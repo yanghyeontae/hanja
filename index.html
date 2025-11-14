@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한자 퀴즈 게임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .game-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .mode-selection {
+            margin-bottom: 30px;
+        }
+
+        .mode-selection h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .mode-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mode-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .mode-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .mode-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .mode-desc {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .grade-selection {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .grade-selection h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .grade-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .grade-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .grade-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .grade-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .grade-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .grade-info p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .hanja-display {
+            font-size: 4em;
+            color: #2c3e50;
+            margin: 20px 0;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .option-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .option-btn.correct {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .option-btn.incorrect {
+            background: #f44336;
+            color: white;
+            border-color: #f44336;
+        }
+
+        .feedback {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .next-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .next-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .next-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .game-over {
+            text-align: center;
+        }
+
+        .final-score {
+            font-size: 2em;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .restart-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .restart-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            .hanja-display {
+                font-size: 3em;
+            }
+            
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .mode-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .mode-btn {
+                padding: 20px;
+            }
+            
+            .grade-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .grade-btn {
+                padding: 12px 8px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">한자 퀴즈 게임</h1>
+        <p class="game-subtitle">한자를 공부해보세요!</p>
+        
+        <div class="mode-selection" id="mode-selection">
+            <h2>게임 모드를 선택하세요</h2>
+            <div class="mode-buttons">
+                <button class="mode-btn" onclick="selectMode('meaning')">
+                    <div class="mode-icon">📝</div>
+                    <div class="mode-title">뜻 맞추기</div>
+                    <div class="mode-desc">한자의 뜻을 맞춰보세요</div>
+                </button>
+                <button class="mode-btn" onclick="selectMode('sound')">
+                    <div class="mode-icon">🔊</div>
+                    <div class="mode-title">음 맞추기</div>
+                    <div class="mode-desc">한자의 음을 맞춰보세요</div>
+                </button>
+                <button class="mode-btn" onclick="selectMode('both')">
+                    <div class="mode-icon">🎯</div>
+                    <div class="mode-title">뜻+음 맞추기</div>
+                    <div class="mode-desc">뜻과 음을 둘 다 맞춰보세요</div>
+                </button>
+            </div>
+            
+            <div class="grade-selection" id="grade-selection" style="display: none;">
+                <h3>한자 급수를 선택하세요</h3>
+            <div class="grade-buttons">
+                <button class="grade-btn" onclick="selectGrade(1)">1급</button>
+                <button class="grade-btn" onclick="selectGrade(2)">2급</button>
+                <button class="grade-btn" onclick="selectGrade(3)">3급</button>
+                <button class="grade-btn" onclick="selectGrade(4)">4급</button>
+                <button class="grade-btn" onclick="selectGrade(5)">5급</button>
+                <button class="grade-btn" onclick="selectGrade(6)">6급</button>
+                <button class="grade-btn" onclick="selectGrade(7)">7급</button>
+                <button class="grade-btn" onclick="selectGrade(7.5)">준7급</button>
+                <button class="grade-btn" onclick="selectGrade(8)">8급</button>
+                <button class="grade-btn" onclick="selectGrade(9)">9급</button>
+            </div>
+                <div class="grade-info">
+                    <p><strong>9급</strong>: 가장 쉬운 한자 (숫자, 기본 한자)</p>
+                    <p><strong>준7급</strong>: 7급과 8급 사이의 중간 난이도</p>
+                    <p><strong>1급</strong>: 가장 어려운 한자 (고급 어휘)</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">점수</div>
+                <div class="score-value" id="score">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">문제</div>
+                <div class="score-value" id="question-number">1 / 10</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">정답률</div>
+                <div class="score-value" id="accuracy">0%</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div id="game-area">
+            <div class="question-container">
+                <div class="hanja-display" id="hanja">山</div>
+                <div class="question-text" id="question-text">이 한자의 뜻은 무엇일까요?</div>
+            </div>
+
+            <div class="options-container" id="options-container">
+                <!-- 옵션 버튼들이 여기에 동적으로 생성됩니다 -->
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>다음 문제</button>
+        </div>
+
+        <div id="game-over" class="game-over" style="display: none;">
+            <h2>게임 종료!</h2>
+            <div class="final-score">최종 점수: <span id="final-score">0</span>점</div>
+            <div>정답률: <span id="final-accuracy">0%</span></div>
+            <button class="restart-btn" onclick="restartGame()">다시 시작</button>
+        </div>
+    </div>
+
+    <script>
+        // 한자 데이터베이스 (1급~9급)
+        const hanjaData = [
+            // 9급 한자 (가장 쉬운 한자)
+            { character: "一", meaning: "하나", sound: "일", grade: 9, options: ["하나", "둘", "셋", "넷"], soundOptions: ["일", "이", "삼", "사"] },
+            { character: "二", meaning: "둘", sound: "이", grade: 9, options: ["둘", "하나", "셋", "넷"], soundOptions: ["이", "일", "삼", "사"] },
+            { character: "三", meaning: "셋", sound: "삼", grade: 9, options: ["셋", "하나", "둘", "넷"], soundOptions: ["삼", "일", "이", "사"] },
+            { character: "四", meaning: "넷", sound: "사", grade: 9, options: ["넷", "하나", "둘", "셋"], soundOptions: ["사", "일", "이", "삼"] },
+            { character: "五", meaning: "다섯", sound: "오", grade: 9, options: ["다섯", "여섯", "일곱", "여덟"], soundOptions: ["오", "육", "칠", "팔"] },
+            { character: "六", meaning: "여섯", sound: "육", grade: 9, options: ["여섯", "다섯", "일곱", "여덟"], soundOptions: ["육", "오", "칠", "팔"] },
+            { character: "七", meaning: "일곱", sound: "칠", grade: 9, options: ["일곱", "여섯", "다섯", "여덟"], soundOptions: ["칠", "육", "오", "팔"] },
+            { character: "八", meaning: "여덟", sound: "팔", grade: 9, options: ["여덟", "일곱", "여섯", "아홉"], soundOptions: ["팔", "칠", "육", "구"] },
+            { character: "九", meaning: "아홉", sound: "구", grade: 9, options: ["아홉", "여덟", "일곱", "열"], soundOptions: ["구", "팔", "칠", "십"] },
+            { character: "十", meaning: "열", sound: "십", grade: 9, options: ["열", "아홉", "여덟", "스무"], soundOptions: ["십", "구", "팔", "이십"] },
+            { character: "高", meaning: "높을", sound: "고", grade: 9, options: ["높을", "낮을", "클", "작을"], soundOptions: ["고", "저", "대", "소"] },
+            { character: "果", meaning: "열매", sound: "과", grade: 9, options: ["열매", "씨", "꽃", "잎"], soundOptions: ["과", "씨", "화", "엽"] },
+            { character: "交", meaning: "사귈", sound: "교", grade: 9, options: ["사귈", "만날", "헤어질", "떠날"], soundOptions: ["교", "만", "리", "거"] },
+            { character: "口", meaning: "입", sound: "구", grade: 9, options: ["입", "코", "눈", "귀"], soundOptions: ["구", "비", "목", "이"] },
+            { character: "力", meaning: "힘", sound: "력", grade: 9, options: ["힘", "약함", "강함", "부드러움"], soundOptions: ["력", "약", "강", "유"] },
+            { character: "老", meaning: "늙을", sound: "로", grade: 9, options: ["늙을", "젊을", "어릴", "성숙할"], soundOptions: ["로", "청", "유", "성"] },
+            { character: "立", meaning: "설", sound: "립", grade: 9, options: ["설", "앉을", "누울", "걸을"], soundOptions: ["립", "좌", "와", "보"] },
+            { character: "馬", meaning: "말", sound: "마", grade: 9, options: ["말", "소", "돼지", "닭"], soundOptions: ["마", "우", "저", "계"] },
+            { character: "萬", meaning: "일만", sound: "만", grade: 9, options: ["일만", "일천", "일백", "일십"], soundOptions: ["만", "천", "백", "십"] },
+            { character: "面", meaning: "낯", sound: "면", grade: 9, options: ["낯", "손", "발", "몸"], soundOptions: ["면", "수", "족", "신"] },
+            { character: "母", meaning: "어미", sound: "모", grade: 9, options: ["어미", "아비", "아들", "딸"], soundOptions: ["모", "부", "자", "녀"] },
+            { character: "木", meaning: "나무", sound: "목", grade: 9, options: ["나무", "돌", "흙", "물"], soundOptions: ["목", "석", "토", "수"] },
+            { character: "目", meaning: "눈", sound: "목", grade: 9, options: ["눈", "코", "입", "귀"], soundOptions: ["목", "비", "구", "이"] },
+            { character: "文", meaning: "글월", sound: "문", grade: 9, options: ["글월", "말", "소리", "그림"], soundOptions: ["문", "언", "음", "화"] },
+            { character: "門", meaning: "문", sound: "문", grade: 9, options: ["문", "창문", "벽", "지붕"], soundOptions: ["문", "창", "벽", "옥"] },
+            { character: "夫", meaning: "지아비", sound: "부", grade: 9, options: ["지아비", "지어미", "아들", "딸"], soundOptions: ["부", "처", "자", "녀"] },
+            { character: "北", meaning: "북녘", sound: "북", grade: 9, options: ["북녘", "남녘", "동녘", "서녘"], soundOptions: ["북", "남", "동", "서"] },
+            { character: "不", meaning: "아닐", sound: "불", grade: 9, options: ["아닐", "맞을", "좋을", "나쁠"], soundOptions: ["불", "시", "선", "악"] },
+            { character: "分", meaning: "나눌", sound: "분", grade: 9, options: ["나눌", "합칠", "더할", "뺄"], soundOptions: ["분", "합", "가", "감"] },
+            { character: "生", meaning: "날", sound: "생", grade: 9, options: ["날", "죽을", "살", "움직일"], soundOptions: ["생", "사", "활", "동"] },
+            { character: "西", meaning: "서녘", sound: "서", grade: 9, options: ["서녘", "동녘", "남녘", "북녘"], soundOptions: ["서", "동", "남", "북"] },
+            { character: "小", meaning: "작을", sound: "소", grade: 9, options: ["작을", "클", "높을", "낮을"], soundOptions: ["소", "대", "고", "저"] },
+            { character: "水", meaning: "물", sound: "수", grade: 9, options: ["물", "불", "흙", "바람"], soundOptions: ["수", "화", "토", "풍"] },
+            { character: "心", meaning: "마음", sound: "심", grade: 9, options: ["마음", "몸", "머리", "손"], soundOptions: ["심", "신", "두", "수"] },
+            { character: "午", meaning: "낮", sound: "오", grade: 9, options: ["낮", "밤", "아침", "저녁"], soundOptions: ["오", "야", "조", "석"] },
+            { character: "右", meaning: "오른", sound: "우", grade: 9, options: ["오른", "왼", "앞", "뒤"], soundOptions: ["우", "좌", "전", "후"] },
+            { character: "牛", meaning: "소", sound: "우", grade: 9, options: ["소", "말", "돼지", "닭"], soundOptions: ["우", "마", "저", "계"] },
+            { character: "月", meaning: "달", sound: "월", grade: 9, options: ["달", "해", "별", "구름"], soundOptions: ["월", "일", "성", "운"] },
+            { character: "入", meaning: "들", sound: "입", grade: 9, options: ["들", "나갈", "올라갈", "내려갈"], soundOptions: ["입", "출", "상", "하"] },
+            { character: "自", meaning: "스스로", sound: "자", grade: 9, options: ["스스로", "남이", "함께", "따로"], soundOptions: ["자", "타", "공", "별"] },
+            { character: "長", meaning: "길", sound: "장", grade: 9, options: ["길", "짧을", "높을", "낮을"], soundOptions: ["장", "단", "고", "저"] },
+            { character: "前", meaning: "앞", sound: "전", grade: 9, options: ["앞", "뒤", "왼", "오른"], soundOptions: ["전", "후", "좌", "우"] },
+            { character: "正", meaning: "바를", sound: "정", grade: 9, options: ["바를", "틀릴", "좋을", "나쁠"], soundOptions: ["정", "오", "선", "악"] },
+            { character: "足", meaning: "발", sound: "족", grade: 9, options: ["발", "손", "머리", "몸"], soundOptions: ["족", "수", "두", "신"] },
+            { character: "中", meaning: "가운데", sound: "중", grade: 9, options: ["가운데", "끝", "시작", "옆"], soundOptions: ["중", "말", "시", "변"] },
+            { character: "靑", meaning: "푸를", sound: "청", grade: 9, options: ["푸를", "빨간", "노란", "검은"], soundOptions: ["청", "적", "황", "흑"] },
+            { character: "出", meaning: "날", sound: "출", grade: 9, options: ["날", "들", "올라갈", "내려갈"], soundOptions: ["출", "입", "상", "하"] },
+            { character: "土", meaning: "흙", sound: "토", grade: 9, options: ["흙", "물", "불", "바람"], soundOptions: ["토", "수", "화", "풍"] },
+            { character: "父", meaning: "아비", sound: "부", grade: 9, options: ["아비", "어미", "아들", "딸"], soundOptions: ["부", "모", "자", "녀"] },
+            { character: "本", meaning: "근본", sound: "본", grade: 9, options: ["근본", "끝", "가운데", "옆"], soundOptions: ["본", "말", "중", "변"] },
+            { character: "學", meaning: "배울", sound: "학", grade: 9, options: ["배울", "가르칠", "읽을", "쓸"], soundOptions: ["학", "교", "독", "서"] },
+            { character: "下", meaning: "아래", sound: "하", grade: 9, options: ["아래", "위", "가운데", "옆"], soundOptions: ["하", "상", "중", "변"] },
+            { character: "行", meaning: "다닐", sound: "행", grade: 9, options: ["다닐", "서있을", "앉을", "누울"], soundOptions: ["행", "입", "좌", "와"] },
+            { character: "兄", meaning: "맏", sound: "형", grade: 9, options: ["맏", "막내", "아버지", "어머니"], soundOptions: ["형", "제", "부", "모"] },
+            { character: "戶", meaning: "지게", sound: "호", grade: 9, options: ["지게", "문", "창문", "벽"], soundOptions: ["호", "문", "창", "벽"] },
+            { character: "化", meaning: "될", sound: "화", grade: 9, options: ["될", "변할", "고칠", "만들"], soundOptions: ["화", "변", "수", "작"] },
+            
+            // 8급 한자
+            { character: "校", meaning: "학교", sound: "교", grade: 8, options: ["학교", "집", "회사", "병원"], soundOptions: ["교", "가", "사", "원"] },
+            { character: "敎", meaning: "가르칠", sound: "교", grade: 8, options: ["가르칠", "배울", "읽을", "쓸"], soundOptions: ["교", "학", "독", "서"] },
+            { character: "九", meaning: "아홉", sound: "구", grade: 8, options: ["아홉", "일곱", "여덟", "열"], soundOptions: ["구", "칠", "팔", "십"] },
+            { character: "國", meaning: "나라", sound: "국", grade: 8, options: ["나라", "도시", "마을", "집"], soundOptions: ["국", "도", "촌", "가"] },
+            { character: "軍", meaning: "군사", sound: "군", grade: 8, options: ["군사", "백성", "왕", "관리"], soundOptions: ["군", "민", "왕", "관"] },
+            { character: "金", meaning: "쇠", sound: "금", grade: 8, options: ["쇠", "돌", "나무", "물"], soundOptions: ["금", "석", "목", "수"] },
+            { character: "南", meaning: "남녘", sound: "남", grade: 8, options: ["남녘", "북녘", "동녘", "서녘"], soundOptions: ["남", "북", "동", "서"] },
+            { character: "女", meaning: "여자", sound: "녀", grade: 8, options: ["여자", "남자", "아이", "어른"], soundOptions: ["녀", "남", "아", "성"] },
+            { character: "年", meaning: "해", sound: "년", grade: 8, options: ["해", "달", "일", "시"], soundOptions: ["년", "월", "일", "시"] },
+            { character: "大", meaning: "큰", sound: "대", grade: 8, options: ["큰", "작은", "높은", "낮은"], soundOptions: ["대", "소", "고", "저"] },
+            { character: "東", meaning: "동녘", sound: "동", grade: 8, options: ["동녘", "서녘", "남녘", "북녘"], soundOptions: ["동", "서", "남", "북"] },
+            { character: "六", meaning: "여섯", sound: "육", grade: 8, options: ["여섯", "일곱", "여덟", "아홉"], soundOptions: ["육", "칠", "팔", "구"] },
+            { character: "萬", meaning: "일만", sound: "만", grade: 8, options: ["일만", "일천", "일백", "일십"], soundOptions: ["만", "천", "백", "십"] },
+            { character: "母", meaning: "어미", sound: "모", grade: 8, options: ["어미", "아비", "아들", "딸"], soundOptions: ["모", "부", "자", "녀"] },
+            { character: "木", meaning: "나무", sound: "목", grade: 8, options: ["나무", "풀", "꽃", "열매"], soundOptions: ["목", "초", "화", "과"] },
+            { character: "門", meaning: "문", sound: "문", grade: 8, options: ["문", "창문", "벽", "지붕"], soundOptions: ["문", "창", "벽", "지"] },
+            { character: "民", meaning: "백성", sound: "민", grade: 8, options: ["백성", "왕", "관리", "군사"], soundOptions: ["민", "왕", "관", "군"] },
+            { character: "白", meaning: "흰", sound: "백", grade: 8, options: ["흰", "검은", "빨간", "파란"], soundOptions: ["백", "흑", "적", "청"] },
+            { character: "父", meaning: "아비", sound: "부", grade: 8, options: ["아비", "어미", "아들", "딸"], soundOptions: ["부", "모", "자", "녀"] },
+            { character: "北", meaning: "북녘", sound: "북", grade: 8, options: ["북녘", "남녘", "동녘", "서녘"], soundOptions: ["북", "남", "동", "서"] },
+            { character: "四", meaning: "넉", sound: "사", grade: 8, options: ["넉", "다섯", "여섯", "일곱"], soundOptions: ["사", "오", "육", "칠"] },
+            { character: "山", meaning: "메", sound: "산", grade: 8, options: ["메", "바다", "강", "호수"], soundOptions: ["산", "해", "강", "호"] },
+            { character: "三", meaning: "석", sound: "삼", grade: 8, options: ["석", "넉", "다섯", "여섯"], soundOptions: ["삼", "사", "오", "육"] },
+            { character: "生", meaning: "날", sound: "생", grade: 8, options: ["날", "죽을", "살", "움직일"], soundOptions: ["생", "사", "활", "동"] },
+            { character: "西", meaning: "서녘", sound: "서", grade: 8, options: ["서녘", "동녘", "남녘", "북녘"], soundOptions: ["서", "동", "남", "북"] },
+            { character: "先", meaning: "먼저", sound: "선", grade: 8, options: ["먼저", "나중", "앞", "뒤"], soundOptions: ["선", "후", "전", "후"] },
+            { character: "小", meaning: "작을", sound: "소", grade: 8, options: ["작을", "큰", "높은", "낮은"], soundOptions: ["소", "대", "고", "저"] },
+            { character: "水", meaning: "물", sound: "수", grade: 8, options: ["물", "불", "흙", "바람"], soundOptions: ["수", "화", "토", "풍"] },
+            { character: "室", meaning: "집", sound: "실", grade: 8, options: ["집", "학교", "회사", "병원"], soundOptions: ["실", "교", "사", "원"] },
+            { character: "十", meaning: "열", sound: "십", grade: 8, options: ["열", "아홉", "일곱", "여덟"], soundOptions: ["십", "구", "칠", "팔"] },
+            { character: "五", meaning: "다섯", sound: "오", grade: 8, options: ["다섯", "넉", "여섯", "일곱"], soundOptions: ["오", "사", "육", "칠"] },
+            { character: "王", meaning: "임금", sound: "왕", grade: 8, options: ["임금", "신하", "백성", "관리"], soundOptions: ["왕", "신", "민", "관"] },
+            { character: "外", meaning: "바깥", sound: "외", grade: 8, options: ["바깥", "안", "속", "밖"], soundOptions: ["외", "내", "속", "외"] },
+            { character: "月", meaning: "달", sound: "월", grade: 8, options: ["달", "해", "별", "구름"], soundOptions: ["월", "일", "성", "운"] },
+            { character: "二", meaning: "두", sound: "이", grade: 8, options: ["두", "한", "셋", "넷"], soundOptions: ["이", "일", "삼", "사"] },
+            { character: "人", meaning: "사람", sound: "인", grade: 8, options: ["사람", "동물", "식물", "물건"], soundOptions: ["인", "동", "식", "물"] },
+            { character: "一", meaning: "한", sound: "일", grade: 8, options: ["한", "둘", "셋", "넷"], soundOptions: ["일", "이", "삼", "사"] },
+            { character: "日", meaning: "날", sound: "일", grade: 8, options: ["날", "달", "해", "월"], soundOptions: ["일", "월", "일", "월"] },
+            { character: "長", meaning: "긴", sound: "장", grade: 8, options: ["긴", "짧을", "높을", "낮을"], soundOptions: ["장", "단", "고", "저"] },
+            { character: "弟", meaning: "아우", sound: "제", grade: 8, options: ["아우", "형", "누나", "언니"], soundOptions: ["제", "형", "누", "언"] },
+            { character: "中", meaning: "가운데", sound: "중", grade: 8, options: ["가운데", "끝", "시작", "중간"], soundOptions: ["중", "말", "시", "중"] },
+            { character: "靑", meaning: "푸를", sound: "청", grade: 8, options: ["푸를", "빨간", "노란", "검은"], soundOptions: ["청", "적", "황", "흑"] },
+            { character: "寸", meaning: "마디", sound: "촌", grade: 8, options: ["마디", "길이", "크기", "높이"], soundOptions: ["촌", "장", "대", "고"] },
+            { character: "七", meaning: "일곱", sound: "칠", grade: 8, options: ["일곱", "여덟", "아홉", "열"], soundOptions: ["칠", "팔", "구", "십"] },
+            { character: "土", meaning: "흙", sound: "토", grade: 8, options: ["흙", "돌", "나무", "물"], soundOptions: ["토", "석", "목", "수"] },
+            { character: "八", meaning: "여덟", sound: "팔", grade: 8, options: ["여덟", "일곱", "아홉", "열"], soundOptions: ["팔", "칠", "구", "십"] },
+            { character: "學", meaning: "배울", sound: "학", grade: 8, options: ["배울", "가르칠", "읽을", "쓸"], soundOptions: ["학", "교", "독", "서"] },
+            { character: "韓", meaning: "한국/나라", sound: "한", grade: 8, options: ["한국/나라", "중국", "일본", "미국"], soundOptions: ["한", "중", "일", "미"] },
+            { character: "兄", meaning: "형", sound: "형", grade: 8, options: ["형", "아우", "누나", "언니"], soundOptions: ["형", "제", "누", "언"] },
+            { character: "火", meaning: "불", sound: "화", grade: 8, options: ["불", "물", "흙", "바람"], soundOptions: ["화", "수", "토", "풍"] },
+            
+            // 준 7급 한자
+            { character: "家", meaning: "집", sound: "가", grade: 7.5, options: ["집", "학교", "회사", "병원"], soundOptions: ["가", "교", "사", "원"] },
+            { character: "間", meaning: "사이", sound: "간", grade: 7.5, options: ["사이", "끝", "시작", "중간"], soundOptions: ["간", "말", "시", "중"] },
+            { character: "江", meaning: "강", sound: "강", grade: 7.5, options: ["강", "바다", "호수", "산"], soundOptions: ["강", "해", "호", "산"] },
+            { character: "車", meaning: "수레", sound: "거", grade: 7.5, options: ["수레", "자동차", "기차", "배"], soundOptions: ["거", "차", "기", "선"] },
+            { character: "工", meaning: "장인", sound: "공", grade: 7.5, options: ["장인", "일꾼", "기술자", "예술가"], soundOptions: ["공", "일", "기", "예"] },
+            { character: "空", meaning: "빌", sound: "공", grade: 7.5, options: ["빌", "가득", "비어있을", "채울"], soundOptions: ["공", "충", "공", "충"] },
+            { character: "氣", meaning: "기운", sound: "기", grade: 7.5, options: ["기운", "힘", "정신", "마음"], soundOptions: ["기", "력", "신", "심"] },
+            { character: "記", meaning: "기록할", sound: "기", grade: 7.5, options: ["기록할", "지울", "읽을", "말할"], soundOptions: ["기", "삭", "독", "언"] },
+            { character: "男", meaning: "사내", sound: "남", grade: 7.5, options: ["사내", "여자", "아이", "어른"], soundOptions: ["남", "녀", "아", "성"] },
+            { character: "內", meaning: "안", sound: "내", grade: 7.5, options: ["안", "밖", "속", "외부"], soundOptions: ["내", "외", "속", "외"] },
+            { character: "農", meaning: "농사", sound: "농", grade: 7.5, options: ["농사", "공장", "상점", "학교"], soundOptions: ["농", "공", "상", "교"] },
+            { character: "答", meaning: "대답", sound: "답", grade: 7.5, options: ["대답", "질문", "문제", "해답"], soundOptions: ["답", "문", "제", "해"] },
+            { character: "道", meaning: "길", sound: "도", grade: 7.5, options: ["길", "방법", "원리", "이치"], soundOptions: ["도", "법", "원", "리"] },
+            { character: "動", meaning: "움직일", sound: "동", grade: 7.5, options: ["움직일", "서있을", "앉을", "눕을"], soundOptions: ["동", "정", "좌", "와"] },
+            { character: "力", meaning: "힘", sound: "력", grade: 7.5, options: ["힘", "약함", "강함", "무력"], soundOptions: ["력", "약", "강", "무"] },
+            { character: "立", meaning: "설", sound: "립", grade: 7.5, options: ["설", "앉을", "눕을", "걸을"], soundOptions: ["립", "좌", "와", "보"] },
+            { character: "每", meaning: "매양", sound: "매", grade: 7.5, options: ["매양", "가끔", "항상", "때때로"], soundOptions: ["매", "가", "항", "때"] },
+            { character: "名", meaning: "이름", sound: "명", grade: 7.5, options: ["이름", "성", "호", "별명"], soundOptions: ["명", "성", "호", "별"] },
+            { character: "物", meaning: "물건", sound: "물", grade: 7.5, options: ["물건", "사람", "동물", "식물"], soundOptions: ["물", "인", "동", "식"] },
+            { character: "方", meaning: "모", sound: "방", grade: 7.5, options: ["모", "방법", "곳", "때"], soundOptions: ["방", "법", "처", "시"] },
+            { character: "不", meaning: "아닐", sound: "불", grade: 7.5, options: ["아닐", "맞을", "옳을", "틀릴"], soundOptions: ["불", "시", "정", "오"] },
+            { character: "事", meaning: "일", sound: "사", grade: 7.5, options: ["일", "일", "업무", "작업"], soundOptions: ["사", "일", "업", "작"] },
+            { character: "上", meaning: "윗", sound: "상", grade: 7.5, options: ["윗", "아래", "가운데", "옆"], soundOptions: ["상", "하", "중", "측"] },
+            { character: "姓", meaning: "성", sound: "성", grade: 7.5, options: ["성", "이름", "호", "별명"], soundOptions: ["성", "명", "호", "별"] },
+            { character: "世", meaning: "인간", sound: "세", grade: 7.5, options: ["인간", "동물", "식물", "물건"], soundOptions: ["세", "동", "식", "물"] },
+            { character: "手", meaning: "손", sound: "수", grade: 7.5, options: ["손", "발", "머리", "몸"], soundOptions: ["수", "족", "두", "신"] },
+            { character: "時", meaning: "때", sound: "시", grade: 7.5, options: ["때", "시간", "날", "해"], soundOptions: ["시", "간", "일", "년"] },
+            { character: "市", meaning: "저자", sound: "시", grade: 7.5, options: ["저자", "시장", "상점", "가게"], soundOptions: ["시", "장", "상", "가"] },
+            { character: "食", meaning: "밥/먹을", sound: "식", grade: 7.5, options: ["밥/먹을", "마실", "배고플", "배부를"], soundOptions: ["식", "음", "기", "포"] },
+            { character: "安", meaning: "편안", sound: "안", grade: 7.5, options: ["편안", "불편", "아플", "건강할"], soundOptions: ["안", "불", "병", "건"] },
+            { character: "午", meaning: "낮", sound: "오", grade: 7.5, options: ["낮", "밤", "아침", "저녁"], soundOptions: ["오", "야", "조", "석"] },
+            { character: "右", meaning: "오를/오른(쪽)", sound: "우", grade: 7.5, options: ["오를/오른(쪽)", "왼", "앞", "뒤"], soundOptions: ["우", "좌", "전", "후"] },
+            { character: "子", meaning: "아들", sound: "자", grade: 7.5, options: ["아들", "딸", "아버지", "어머니"], soundOptions: ["자", "녀", "부", "모"] },
+            { character: "自", meaning: "스스로", sound: "자", grade: 7.5, options: ["스스로", "남이", "함께", "따로"], soundOptions: ["자", "타", "공", "별"] },
+            { character: "場", meaning: "마당", sound: "장", grade: 7.5, options: ["마당", "방", "집", "학교"], soundOptions: ["장", "방", "가", "교"] },
+            { character: "電", meaning: "번개", sound: "전", grade: 7.5, options: ["번개", "구름", "비", "바람"], soundOptions: ["전", "운", "우", "풍"] },
+            { character: "前", meaning: "앞", sound: "전", grade: 7.5, options: ["앞", "뒤", "왼", "오른"], soundOptions: ["전", "후", "좌", "우"] },
+            { character: "全", meaning: "온전", sound: "전", grade: 7.5, options: ["온전", "부족", "완전", "불완전"], soundOptions: ["전", "부", "완", "불"] },
+            { character: "正", meaning: "바를", sound: "정", grade: 7.5, options: ["바를", "틀릴", "맞을", "어긋날"], soundOptions: ["정", "오", "시", "어"] },
+            { character: "足", meaning: "발", sound: "족", grade: 7.5, options: ["발", "손", "머리", "몸"], soundOptions: ["족", "수", "두", "신"] },
+            { character: "左", meaning: "왼", sound: "좌", grade: 7.5, options: ["왼", "오른", "앞", "뒤"], soundOptions: ["좌", "우", "전", "후"] },
+            { character: "直", meaning: "곧을", sound: "직", grade: 7.5, options: ["곧을", "굽을", "바를", "틀릴"], soundOptions: ["직", "곡", "정", "오"] },
+            { character: "平", meaning: "평평할", sound: "평", grade: 7.5, options: ["평평할", "울퉁불퉁", "높을", "낮을"], soundOptions: ["평", "울", "고", "저"] },
+            { character: "下", meaning: "아래", sound: "하", grade: 7.5, options: ["아래", "위", "가운데", "옆"], soundOptions: ["하", "상", "중", "측"] },
+            { character: "漢", meaning: "한수/한나라", sound: "한", grade: 7.5, options: ["한수/한나라", "중국", "일본", "미국"], soundOptions: ["한", "중", "일", "미"] },
+            { character: "海", meaning: "바다", sound: "해", grade: 7.5, options: ["바다", "강", "호수", "산"], soundOptions: ["해", "강", "호", "산"] },
+            { character: "話", meaning: "말씀", sound: "화", grade: 7.5, options: ["말씀", "글", "소리", "그림"], soundOptions: ["화", "문", "음", "화"] },
+            { character: "活", meaning: "살", sound: "활", grade: 7.5, options: ["살", "죽을", "움직일", "서있을"], soundOptions: ["활", "사", "동", "정"] },
+            { character: "孝", meaning: "효도", sound: "효", grade: 7.5, options: ["효도", "불효", "사랑", "미움"], soundOptions: ["효", "불", "애", "증"] },
+            { character: "後", meaning: "뒤", sound: "후", grade: 7.5, options: ["뒤", "앞", "왼", "오른"], soundOptions: ["후", "전", "좌", "우"] },
+            
+            // 7급 한자
+            { character: "家", meaning: "집", sound: "가", grade: 7, options: ["집", "학교", "회사", "병원"], soundOptions: ["가", "교", "사", "원"] },
+            { character: "歌", meaning: "노래", sound: "가", grade: 7, options: ["노래", "춤", "연주", "연극"], soundOptions: ["가", "무", "연", "극"] },
+            { character: "間", meaning: "사이", sound: "간", grade: 7, options: ["사이", "끝", "시작", "중간"], soundOptions: ["간", "말", "시", "중"] },
+            { character: "江", meaning: "강", sound: "강", grade: 7, options: ["강", "바다", "호수", "산"], soundOptions: ["강", "해", "호", "산"] },
+            { character: "車", meaning: "수레", sound: "거", grade: 7, options: ["수레", "배", "비행기", "기차"], soundOptions: ["거", "선", "기", "차"] },
+            { character: "空", meaning: "빌", sound: "공", grade: 7, options: ["빌", "찬", "가득", "많을"], soundOptions: ["공", "찬", "만", "다"] },
+            { character: "記", meaning: "기록할", sound: "기", grade: 7, options: ["기록할", "읽을", "쓸", "말할"], soundOptions: ["기", "독", "서", "언"] },
+            { character: "氣", meaning: "기운", sound: "기", grade: 7, options: ["기운", "힘", "정신", "마음"], soundOptions: ["기", "력", "신", "심"] },
+            { character: "男", meaning: "사내", sound: "남", grade: 7, options: ["사내", "계집", "아이", "어른"], soundOptions: ["남", "녀", "아", "성"] },
+            { character: "農", meaning: "농사", sound: "농", grade: 7, options: ["농사", "공장", "상점", "학교"], soundOptions: ["농", "공", "상", "교"] },
+            { character: "答", meaning: "대답", sound: "답", grade: 7, options: ["대답", "질문", "물을", "알"], soundOptions: ["답", "문", "문", "지"] },
+            { character: "道", meaning: "길", sound: "도", grade: 7, options: ["길", "방법", "원리", "이치"], soundOptions: ["도", "법", "리", "치"] },
+            { character: "動", meaning: "움직일", sound: "동", grade: 7, options: ["움직일", "서있을", "앉을", "누울"], soundOptions: ["동", "정", "좌", "와"] },
+            { character: "登", meaning: "오를", sound: "등", grade: 7, options: ["오를", "내려갈", "걸을", "뛸"], soundOptions: ["등", "하", "보", "도"] },
+            { character: "來", meaning: "올", sound: "래", grade: 7, options: ["올", "갈", "돌아올", "떠날"], soundOptions: ["래", "거", "귀", "거"] },
+            { character: "林", meaning: "수풀", sound: "림", grade: 7, options: ["수풀", "나무", "꽃", "풀"], soundOptions: ["림", "목", "화", "초"] },
+            { character: "每", meaning: "매양", sound: "매", grade: 7, options: ["매양", "가끔", "절대", "전혀"], soundOptions: ["매", "가", "절", "전"] },
+            { character: "物", meaning: "물건", sound: "물", grade: 7, options: ["물건", "사람", "동물", "식물"], soundOptions: ["물", "인", "동", "식"] },
+            { character: "方", meaning: "모", sound: "방", grade: 7, options: ["모", "방법", "곳", "때"], soundOptions: ["방", "법", "처", "시"] },
+            { character: "百", meaning: "일백", sound: "백", grade: 7, options: ["일백", "일천", "일만", "일십"], soundOptions: ["백", "천", "만", "십"] },
+            { character: "色", meaning: "빛", sound: "색", grade: 7, options: ["빛", "모양", "크기", "무게"], soundOptions: ["색", "형", "대", "중"] },
+            { character: "夕", meaning: "저녁", sound: "석", grade: 7, options: ["저녁", "아침", "낮", "밤"], soundOptions: ["석", "조", "주", "야"] },
+            { character: "世", meaning: "인간", sound: "세", grade: 7, options: ["인간", "동물", "식물", "물건"], soundOptions: ["세", "동", "식", "물"] },
+            { character: "少", meaning: "적을", sound: "소", grade: 7, options: ["적을", "많을", "클", "작을"], soundOptions: ["소", "다", "대", "소"] },
+            { character: "所", meaning: "바", sound: "소", grade: 7, options: ["바", "곳", "때", "방법"], soundOptions: ["소", "처", "시", "법"] },
+            { character: "手", meaning: "손", sound: "수", grade: 7, options: ["손", "발", "머리", "몸"], soundOptions: ["수", "족", "두", "신"] },
+            { character: "市", meaning: "저자", sound: "시", grade: 7, options: ["저자", "시장", "가게", "집"], soundOptions: ["시", "장", "점", "가"] },
+            { character: "時", meaning: "때", sound: "시", grade: 7, options: ["때", "곳", "방법", "이유"], soundOptions: ["시", "처", "법", "유"] },
+            { character: "食", meaning: "밥", sound: "식", grade: 7, options: ["밥", "물", "옷", "집"], soundOptions: ["식", "음", "의", "주"] },
+            { character: "室", meaning: "집", sound: "실", grade: 7, options: ["집", "방", "문", "창문"], soundOptions: ["실", "방", "문", "창"] },
+            { character: "安", meaning: "편안할", sound: "안", grade: 7, options: ["편안할", "위험할", "어려울", "쉬울"], soundOptions: ["안", "위", "난", "이"] },
+            { character: "語", meaning: "말씀", sound: "어", grade: 7, options: ["말씀", "글", "소리", "그림"], soundOptions: ["어", "문", "음", "화"] },
+            { character: "有", meaning: "있을", sound: "유", grade: 7, options: ["있을", "없을", "많을", "적을"], soundOptions: ["유", "무", "다", "소"] },
+            { character: "育", meaning: "기를", sound: "육", grade: 7, options: ["기를", "가르칠", "배울", "읽을"], soundOptions: ["육", "교", "학", "독"] },
+            { character: "者", meaning: "놈", sound: "자", grade: 7, options: ["놈", "사람", "물건", "동물"], soundOptions: ["자", "인", "물", "동"] },
+            { character: "長", meaning: "길", sound: "장", grade: 7, options: ["길", "짧을", "높을", "낮을"], soundOptions: ["장", "단", "고", "저"] },
+            { character: "電", meaning: "번개", sound: "전", grade: 7, options: ["번개", "비", "바람", "눈"], soundOptions: ["전", "우", "풍", "설"] },
+            { character: "祖", meaning: "조상", sound: "조", grade: 7, options: ["조상", "자손", "부모", "형제"], soundOptions: ["조", "손", "부", "형"] },
+            { character: "紙", meaning: "종이", sound: "지", grade: 7, options: ["종이", "돌", "나무", "금속"], soundOptions: ["지", "석", "목", "금"] },
+            { character: "重", meaning: "무거울", sound: "중", grade: 7, options: ["무거울", "가벼울", "큰", "작은"], soundOptions: ["중", "경", "대", "소"] },
+            { character: "川", meaning: "내", sound: "천", grade: 7, options: ["내", "바다", "호수", "산"], soundOptions: ["천", "해", "호", "산"] },
+            { character: "親", meaning: "친할", sound: "친", grade: 7, options: ["친할", "원할", "좋을", "나쁠"], soundOptions: ["친", "원", "선", "악"] },
+            { character: "平", meaning: "평평할", sound: "평", grade: 7, options: ["평평할", "울퉁불퉁", "높을", "낮을"], soundOptions: ["평", "불", "고", "저"] },
+            { character: "海", meaning: "바다", sound: "해", grade: 7, options: ["바다", "강", "호수", "산"], soundOptions: ["해", "강", "호", "산"] },
+            { character: "話", meaning: "말씀", sound: "화", grade: 7, options: ["말씀", "글", "소리", "그림"], soundOptions: ["화", "문", "음", "화"] },
+            { character: "花", meaning: "꽃", sound: "화", grade: 7, options: ["꽃", "나무", "풀", "잎"], soundOptions: ["화", "목", "초", "엽"] },
+            { character: "活", meaning: "살", sound: "활", grade: 7, options: ["살", "죽을", "움직일", "서있을"], soundOptions: ["활", "사", "동", "정"] },
+            { character: "後", meaning: "뒤", sound: "후", grade: 7, options: ["뒤", "앞", "왼", "오른"], soundOptions: ["후", "전", "좌", "우"] },
+            { character: "休", meaning: "쉴", sound: "휴", grade: 7, options: ["쉴", "일할", "공부할", "놀"], soundOptions: ["휴", "일", "학", "유"] },
+            { character: "孝", meaning: "효도", sound: "효", grade: 7, options: ["효도", "불효", "사랑", "미움"], soundOptions: ["효", "불", "애", "증"] },
+            
+            // 6급 한자
+            { character: "各", meaning: "각각", sound: "각", grade: 6, options: ["각각", "모두", "함께", "따로"], soundOptions: ["각", "모", "공", "별"] },
+            { character: "感", meaning: "느낄", sound: "감", grade: 6, options: ["느낄", "생각할", "알", "모를"], soundOptions: ["감", "상", "지", "미"] },
+            { character: "强", meaning: "강할", sound: "강", grade: 6, options: ["강할", "약할", "큰", "작은"], soundOptions: ["강", "약", "대", "소"] },
+            { character: "開", meaning: "열", sound: "개", grade: 6, options: ["열", "닫을", "만들", "부술"], soundOptions: ["개", "폐", "작", "파"] },
+            { character: "京", meaning: "서울", sound: "경", grade: 6, options: ["서울", "시골", "바다", "산"], soundOptions: ["경", "촌", "해", "산"] },
+            { character: "界", meaning: "지경", sound: "계", grade: 6, options: ["지경", "중심", "끝", "시작"], soundOptions: ["계", "심", "말", "시"] },
+            { character: "計", meaning: "셀", sound: "계", grade: 6, options: ["셀", "더할", "뺄", "곱할"], soundOptions: ["계", "가", "감", "승"] },
+            { character: "苦", meaning: "쓸/괴로울", sound: "고", grade: 6, options: ["쓸/괴로울", "달/즐거울", "많을", "적을"], soundOptions: ["고", "감", "다", "소"] },
+            { character: "功", meaning: "공", sound: "공", grade: 6, options: ["공", "과", "실패", "실수"], soundOptions: ["공", "과", "패", "실"] },
+            { character: "共", meaning: "함께", sound: "공", grade: 6, options: ["함께", "따로", "모두", "일부"], soundOptions: ["공", "별", "모", "일"] },
+            { character: "球", meaning: "공", sound: "구", grade: 6, options: ["공", "네모", "세모", "직선"], soundOptions: ["구", "방", "각", "선"] },
+            { character: "君", meaning: "임금", sound: "군", grade: 6, options: ["임금", "신하", "백성", "관리"], soundOptions: ["군", "신", "민", "관"] },
+            { character: "急", meaning: "급할", sound: "급", grade: 6, options: ["급할", "천천히", "빠를", "느릴"], soundOptions: ["급", "완", "속", "지"] },
+            { character: "根", meaning: "뿌리", sound: "근", grade: 6, options: ["뿌리", "가지", "잎", "꽃"], soundOptions: ["근", "지", "엽", "화"] },
+            { character: "記", meaning: "기록할", sound: "기", grade: 6, options: ["기록할", "지울", "읽을", "말할"], soundOptions: ["기", "삭", "독", "언"] },
+            { character: "達", meaning: "통달할", sound: "달", grade: 6, options: ["통달할", "막힐", "이를", "떠날"], soundOptions: ["달", "체", "도", "거"] },
+            { character: "德", meaning: "덕", sound: "덕", grade: 6, options: ["덕", "악", "선", "악"], soundOptions: ["덕", "악", "선", "악"] },
+            { character: "到", meaning: "이를", sound: "도", grade: 6, options: ["이를", "떠날", "올", "갈"], soundOptions: ["도", "거", "래", "거"] },
+            { character: "讀", meaning: "읽을", sound: "독", grade: 6, options: ["읽을", "쓸", "말할", "듣을"], soundOptions: ["독", "서", "언", "청"] },
+            { character: "短", meaning: "짧을", sound: "단", grade: 6, options: ["짧을", "길", "높을", "낮을"], soundOptions: ["단", "장", "고", "저"] },
+            { character: "落", meaning: "떨어질", sound: "락", grade: 6, options: ["떨어질", "오를", "올라갈", "내려갈"], soundOptions: ["락", "등", "상", "하"] },
+            { character: "禮", meaning: "예도", sound: "례", grade: 6, options: ["예도", "무례", "정중", "거만"], soundOptions: ["례", "무", "정", "거"] },
+            { character: "例", meaning: "법식", sound: "례", grade: 6, options: ["법식", "규칙", "원칙", "방법"], soundOptions: ["례", "규", "원", "법"] },
+            { character: "老", meaning: "늙을", sound: "로", grade: 6, options: ["늙을", "젊을", "어릴", "성숙할"], soundOptions: ["로", "청", "유", "성"] },
+            { character: "料", meaning: "헤아릴", sound: "료", grade: 6, options: ["헤아릴", "생각할", "알", "모를"], soundOptions: ["료", "상", "지", "미"] },
+            { character: "萬", meaning: "일만", sound: "만", grade: 6, options: ["일만", "일천", "일백", "일십"], soundOptions: ["만", "천", "백", "십"] },
+            { character: "滿", meaning: "찰", sound: "만", grade: 6, options: ["찰", "빌", "가득", "적을"], soundOptions: ["만", "공", "충", "소"] },
+            { character: "面", meaning: "낯", sound: "면", grade: 6, options: ["낯", "손", "발", "몸"], soundOptions: ["면", "수", "족", "신"] },
+            { character: "問", meaning: "물을", sound: "문", grade: 6, options: ["물을", "답할", "알", "모를"], soundOptions: ["문", "답", "지", "미"] },
+            { character: "民", meaning: "백성", sound: "민", grade: 6, options: ["백성", "왕", "관리", "군사"], soundOptions: ["민", "왕", "관", "군"] },
+            { character: "別", meaning: "다를", sound: "별", grade: 6, options: ["다를", "같을", "비슷할", "일치할"], soundOptions: ["별", "동", "유", "일"] },
+            { character: "兵", meaning: "군사", sound: "병", grade: 6, options: ["군사", "백성", "왕", "관리"], soundOptions: ["병", "민", "왕", "관"] },
+            { character: "福", meaning: "복", sound: "복", grade: 6, options: ["복", "화", "행운", "불운"], soundOptions: ["복", "화", "운", "불"] },
+            { character: "父", meaning: "아비", sound: "부", grade: 6, options: ["아비", "어미", "아들", "딸"], soundOptions: ["부", "모", "자", "녀"] },
+            { character: "富", meaning: "부유할", sound: "부", grade: 6, options: ["부유할", "가난할", "많을", "적을"], soundOptions: ["부", "빈", "다", "소"] },
+            { character: "賞", meaning: "상줄", sound: "상", grade: 6, options: ["상줄", "벌할", "칭찬할", "꾸짖을"], soundOptions: ["상", "벌", "찬", "질"] },
+            { character: "象", meaning: "코끼리", sound: "상", grade: 6, options: ["코끼리", "호랑이", "사자", "곰"], soundOptions: ["상", "호", "사", "웅"] },
+            { character: "想", meaning: "생각", sound: "상", grade: 6, options: ["생각", "기억", "꿈", "현실"], soundOptions: ["상", "억", "몽", "현"] },
+            { character: "生", meaning: "날", sound: "생", grade: 6, options: ["날", "죽을", "살", "움직일"], soundOptions: ["생", "사", "활", "동"] },
+            { character: "書", meaning: "글", sound: "서", grade: 6, options: ["글", "말", "소리", "그림"], soundOptions: ["서", "언", "음", "화"] },
+            { character: "水", meaning: "물", sound: "수", grade: 6, options: ["물", "불", "흙", "바람"], soundOptions: ["수", "화", "토", "풍"] },
+            { character: "始", meaning: "비로소", sound: "시", grade: 6, options: ["비로소", "끝", "중간", "계속"], soundOptions: ["시", "종", "중", "계"] },
+            { character: "信", meaning: "믿을", sound: "신", grade: 6, options: ["믿을", "의심할", "확신할", "불신할"], soundOptions: ["신", "의", "확", "불"] },
+            { character: "息", meaning: "숨쉴", sound: "식", grade: 6, options: ["숨쉴", "죽을", "살", "움직일"], soundOptions: ["식", "사", "생", "동"] },
+            { character: "失", meaning: "잃을", sound: "실", grade: 6, options: ["잃을", "찾을", "얻을", "가질"], soundOptions: ["실", "득", "득", "유"] },
+            { character: "愛", meaning: "사랑", sound: "애", grade: 6, options: ["사랑", "미움", "좋아할", "싫어할"], soundOptions: ["애", "증", "호", "오"] },
+            { character: "易", meaning: "쉬울", sound: "역", grade: 6, options: ["쉬울", "어려울", "간단할", "복잡할"], soundOptions: ["역", "난", "간", "복"] },
+            { character: "然", meaning: "그러할", sound: "연", grade: 6, options: ["그러할", "아닐", "맞을", "틀릴"], soundOptions: ["연", "불", "시", "오"] },
+            { character: "熱", meaning: "더울", sound: "열", grade: 6, options: ["더울", "차가울", "따뜻할", "시원할"], soundOptions: ["열", "냉", "온", "량"] },
+            { character: "念", meaning: "생각", sound: "념", grade: 6, options: ["생각", "기억", "꿈", "현실"], soundOptions: ["념", "억", "몽", "현"] },
+            { character: "溫", meaning: "따뜻할", sound: "온", grade: 6, options: ["따뜻할", "차가울", "더울", "시원할"], soundOptions: ["온", "냉", "열", "량"] },
+            { character: "外", meaning: "바깥", sound: "외", grade: 6, options: ["바깥", "안", "속", "밖"], soundOptions: ["외", "내", "속", "외"] },
+            { character: "用", meaning: "쓸", sound: "용", grade: 6, options: ["쓸", "버릴", "가질", "없을"], soundOptions: ["용", "폐", "유", "무"] },
+            { character: "元", meaning: "으뜸", sound: "원", grade: 6, options: ["으뜸", "끝", "중간", "일부"], soundOptions: ["원", "말", "중", "일"] },
+            { character: "月", meaning: "달", sound: "월", grade: 6, options: ["달", "해", "별", "구름"], soundOptions: ["월", "일", "성", "운"] },
+            { character: "有", meaning: "있을", sound: "유", grade: 6, options: ["있을", "없을", "많을", "적을"], soundOptions: ["유", "무", "다", "소"] },
+            { character: "友", meaning: "벗", sound: "우", grade: 6, options: ["벗", "원수", "동료", "적"], soundOptions: ["우", "수", "동", "적"] },
+            { character: "右", meaning: "오른", sound: "우", grade: 6, options: ["오른", "왼", "앞", "뒤"], soundOptions: ["우", "좌", "전", "후"] },
+            { character: "雄", meaning: "수컷", sound: "웅", grade: 6, options: ["수컷", "암컷", "남자", "여자"], soundOptions: ["웅", "자", "남", "녀"] },
+            { character: "幼", meaning: "어릴", sound: "유", grade: 6, options: ["어릴", "늙을", "젊을", "성숙할"], soundOptions: ["유", "로", "청", "성"] },
+            { character: "醫", meaning: "의원", sound: "의", grade: 6, options: ["의원", "환자", "간호사", "약사"], soundOptions: ["의", "환", "간", "약"] },
+            { character: "以", meaning: "써", sound: "이", grade: 6, options: ["써", "버릴", "가질", "없을"], soundOptions: ["이", "폐", "유", "무"] },
+            { character: "利", meaning: "이로울", sound: "리", grade: 6, options: ["이로울", "해로울", "좋을", "나쁠"], soundOptions: ["리", "해", "선", "악"] },
+            { character: "引", meaning: "끌", sound: "인", grade: 6, options: ["끌", "밀", "당길", "보낼"], soundOptions: ["인", "밀", "당", "송"] },
+            { character: "印", meaning: "도장", sound: "인", grade: 6, options: ["도장", "서명", "사인", "표시"], soundOptions: ["인", "서", "사", "표"] },
+            { character: "自", meaning: "스스로", sound: "자", grade: 6, options: ["스스로", "남이", "함께", "따로"], soundOptions: ["자", "타", "공", "별"] },
+            { character: "雜", meaning: "섞일", sound: "잡", grade: 6, options: ["섞일", "갈라질", "정리할", "정돈할"], soundOptions: ["잡", "분", "정", "정"] },
+            { character: "長", meaning: "길", sound: "장", grade: 6, options: ["길", "짧을", "높을", "낮을"], soundOptions: ["장", "단", "고", "저"] },
+            { character: "全", meaning: "온전할", sound: "전", grade: 6, options: ["온전할", "부족할", "완전할", "불완전할"], soundOptions: ["전", "부", "완", "불"] },
+            { character: "專", meaning: "오로지", sound: "전", grade: 6, options: ["오로지", "함께", "모두", "일부"], soundOptions: ["전", "공", "모", "일"] },
+            { character: "情", meaning: "뜻", sound: "정", grade: 6, options: ["뜻", "감정", "마음", "생각"], soundOptions: ["정", "감", "심", "상"] },
+            { character: "弟", meaning: "아우", sound: "제", grade: 6, options: ["아우", "형", "누나", "언니"], soundOptions: ["제", "형", "누", "언"] },
+            { character: "朝", meaning: "아침", sound: "조", grade: 6, options: ["아침", "저녁", "낮", "밤"], soundOptions: ["조", "석", "주", "야"] },
+            { character: "足", meaning: "발", sound: "족", grade: 6, options: ["발", "손", "머리", "몸"], soundOptions: ["족", "수", "두", "신"] },
+            { character: "存", meaning: "있을", sound: "존", grade: 6, options: ["있을", "없을", "살", "죽을"], soundOptions: ["존", "무", "생", "사"] },
+            { character: "主", meaning: "주인", sound: "주", grade: 6, options: ["주인", "손님", "객", "빈"], soundOptions: ["주", "객", "객", "빈"] },
+            { character: "準", meaning: "준할", sound: "준", grade: 6, options: ["준할", "틀릴", "맞을", "어긋날"], soundOptions: ["준", "오", "시", "어"] },
+            { character: "重", meaning: "무거울", sound: "중", grade: 6, options: ["무거울", "가벼울", "중요할", "하찮을"], soundOptions: ["중", "경", "요", "하"] },
+            { character: "地", meaning: "땅", sound: "지", grade: 6, options: ["땅", "하늘", "바다", "산"], soundOptions: ["지", "천", "해", "산"] },
+            { character: "直", meaning: "곧을", sound: "직", grade: 6, options: ["곧을", "굽을", "바를", "틀릴"], soundOptions: ["직", "곡", "정", "오"] },
+            { character: "親", meaning: "친할", sound: "친", grade: 6, options: ["친할", "원할", "좋을", "나쁠"], soundOptions: ["친", "원", "선", "악"] },
+            { character: "擇", meaning: "가릴", sound: "택", grade: 6, options: ["가릴", "모을", "선택할", "버릴"], soundOptions: ["택", "집", "선", "폐"] },
+            { character: "通", meaning: "통할", sound: "통", grade: 6, options: ["통할", "막힐", "이을", "끊을"], soundOptions: ["통", "체", "연", "단"] },
+            { character: "便", meaning: "편할", sound: "편", grade: 6, options: ["편할", "불편할", "쉬울", "어려울"], soundOptions: ["편", "불", "이", "난"] },
+            { character: "必", meaning: "반드시", sound: "필", grade: 6, options: ["반드시", "아마", "혹시", "절대"], soundOptions: ["필", "아", "혹", "절"] },
+            { character: "河", meaning: "물", sound: "하", grade: 6, options: ["물", "강", "바다", "호수"], soundOptions: ["하", "강", "해", "호"] },
+            { character: "學", meaning: "배울", sound: "학", grade: 6, options: ["배울", "가르칠", "읽을", "쓸"], soundOptions: ["학", "교", "독", "서"] },
+            { character: "限", meaning: "한계", sound: "한", grade: 6, options: ["한계", "무한", "끝", "시작"], soundOptions: ["한", "무", "말", "시"] },
+            { character: "合", meaning: "합할", sound: "합", grade: 6, options: ["합할", "갈라질", "모을", "흩을"], soundOptions: ["합", "분", "집", "산"] },
+            { character: "幸", meaning: "다행", sound: "행", grade: 6, options: ["다행", "불행", "행운", "불운"], soundOptions: ["행", "불", "운", "불"] },
+            { character: "活", meaning: "살", sound: "활", grade: 6, options: ["살", "죽을", "움직일", "서있을"], soundOptions: ["활", "사", "동", "정"] },
+            { character: "厚", meaning: "두터울", sound: "후", grade: 6, options: ["두터울", "얇을", "깊을", "얕을"], soundOptions: ["후", "박", "심", "천"] },
+            { character: "興", meaning: "일", sound: "흥", grade: 6, options: ["일", "쇠할", "번영할", "쇠퇴할"], soundOptions: ["흥", "쇠", "번", "쇠"] },
+            
+            // 5급 한자
+            { character: "加", meaning: "더할", sound: "가", grade: 5, options: ["더할", "뺄", "곱할", "나눌"], soundOptions: ["가", "감", "승", "제"] },
+            { character: "可", meaning: "옳을", sound: "가", grade: 5, options: ["옳을", "틀릴", "맞을", "어긋날"], soundOptions: ["가", "불", "시", "어"] },
+            { character: "改", meaning: "고칠", sound: "개", grade: 5, options: ["고칠", "그대로", "만들", "부술"], soundOptions: ["개", "유", "작", "파"] },
+            { character: "擧", meaning: "들", sound: "거", grade: 5, options: ["들", "내릴", "올릴", "떨어뜨릴"], soundOptions: ["거", "하", "상", "락"] },
+            { character: "去", meaning: "갈", sound: "거", grade: 5, options: ["갈", "올", "떠날", "돌아올"], soundOptions: ["거", "래", "거", "귀"] },
+            { character: "件", meaning: "물건", sound: "건", grade: 5, options: ["물건", "사람", "일", "장소"], soundOptions: ["건", "인", "사", "처"] },
+            { character: "建", meaning: "세울", sound: "건", grade: 5, options: ["세울", "무너뜨릴", "만들", "부술"], soundOptions: ["건", "붕", "작", "파"] },
+            { character: "健", meaning: "굳셀", sound: "건", grade: 5, options: ["굳셀", "약할", "강할", "부드러울"], soundOptions: ["건", "약", "강", "유"] },
+            { character: "輕", meaning: "가벼울", sound: "경", grade: 5, options: ["가벼울", "무거울", "쉬울", "어려울"], soundOptions: ["경", "중", "이", "난"] },
+            { character: "競", meaning: "다툴", sound: "경", grade: 5, options: ["다툴", "협력할", "싸울", "화해할"], soundOptions: ["경", "협", "투", "화"] },
+            { character: "景", meaning: "볕", sound: "경", grade: 5, options: ["볕", "그늘", "빛", "어둠"], soundOptions: ["경", "음", "광", "암"] },
+            { character: "考", meaning: "생각할", sound: "고", grade: 5, options: ["생각할", "잊을", "기억할", "모를"], soundOptions: ["고", "망", "기", "미"] },
+            { character: "固", meaning: "굳을", sound: "고", grade: 5, options: ["굳을", "부드러울", "단단할", "약할"], soundOptions: ["고", "유", "단", "약"] },
+            { character: "曲", meaning: "굽을", sound: "곡", grade: 5, options: ["굽을", "곧을", "휠", "바를"], soundOptions: ["곡", "직", "휴", "정"] },
+            { character: "橋", meaning: "다리", sound: "교", grade: 5, options: ["다리", "길", "터널", "강"], soundOptions: ["교", "로", "터", "강"] },
+            { character: "救", meaning: "구원할", sound: "구", grade: 5, options: ["구원할", "버릴", "돕", "해칠"], soundOptions: ["구", "폐", "조", "해"] },
+            { character: "貴", meaning: "귀할", sound: "귀", grade: 5, options: ["귀할", "천할", "높을", "낮을"], soundOptions: ["귀", "천", "고", "저"] },
+            { character: "規", meaning: "법", sound: "규", grade: 5, options: ["법", "규칙", "제도", "원칙"], soundOptions: ["규", "칙", "제", "원"] },
+            { character: "給", meaning: "줄", sound: "급", grade: 5, options: ["줄", "받을", "가질", "버릴"], soundOptions: ["급", "수", "유", "폐"] },
+            { character: "汽", meaning: "물끓는김", sound: "기", grade: 5, options: ["물끓는김", "물", "불", "바람"], soundOptions: ["기", "수", "화", "풍"] },
+            { character: "期", meaning: "기약할", sound: "기", grade: 5, options: ["기약할", "만날", "약속할", "어길"], soundOptions: ["기", "회", "약", "위"] },
+            { character: "技", meaning: "재주", sound: "기", grade: 5, options: ["재주", "기술", "능력", "무능"], soundOptions: ["기", "술", "능", "무"] },
+            { character: "吉", meaning: "길할", sound: "길", grade: 5, options: ["길할", "흉할", "좋을", "나쁠"], soundOptions: ["길", "흉", "선", "악"] },
+            { character: "壇", meaning: "단", sound: "단", grade: 5, options: ["단", "제단", "무대", "땅"], soundOptions: ["단", "제", "대", "지"] },
+            { character: "談", meaning: "말씀", sound: "담", grade: 5, options: ["말씀", "침묵", "대화", "글"], soundOptions: ["담", "묵", "화", "서"] },
+            { character: "都", meaning: "도읍", sound: "도", grade: 5, options: ["도읍", "시골", "성", "마을"], soundOptions: ["도", "촌", "성", "촌"] },
+            { character: "島", meaning: "섬", sound: "도", grade: 5, options: ["섬", "바다", "땅", "산"], soundOptions: ["도", "해", "지", "산"] },
+            { character: "落", meaning: "떨어질", sound: "락", grade: 5, options: ["떨어질", "오를", "올라갈", "내려갈"], soundOptions: ["락", "등", "상", "하"] },
+            { character: "冷", meaning: "찰", sound: "랭", grade: 5, options: ["찰", "더울", "따뜻할", "시원할"], soundOptions: ["랭", "열", "온", "량"] },
+            { character: "量", meaning: "헤아릴", sound: "량", grade: 5, options: ["헤아릴", "생각할", "알", "모를"], soundOptions: ["량", "상", "지", "미"] },
+            { character: "領", meaning: "거느릴", sound: "령", grade: 5, options: ["거느릴", "따를", "지배할", "복종할"], soundOptions: ["령", "종", "지", "복"] },
+            { character: "令", meaning: "하여금", sound: "령", grade: 5, options: ["하여금", "시킬", "명할", "금할"], soundOptions: ["령", "사", "명", "금"] },
+            { character: "料", meaning: "헤아릴", sound: "료", grade: 5, options: ["헤아릴", "생각할", "알", "모를"], soundOptions: ["료", "상", "지", "미"] },
+            { character: "馬", meaning: "말", sound: "마", grade: 5, options: ["말", "소", "양", "돼지"], soundOptions: ["마", "우", "양", "돈"] },
+            { character: "末", meaning: "끝", sound: "말", grade: 5, options: ["끝", "시작", "중간", "가운데"], soundOptions: ["말", "시", "중", "중"] },
+            { character: "亡", meaning: "망할", sound: "망", grade: 5, options: ["망할", "흥할", "멸할", "일어날"], soundOptions: ["망", "흥", "멸", "기"] },
+            { character: "買", meaning: "살", sound: "매", grade: 5, options: ["살", "팔", "얻을", "버릴"], soundOptions: ["매", "매", "득", "폐"] },
+            { character: "賣", meaning: "팔", sound: "매", grade: 5, options: ["팔", "살", "주", "받을"], soundOptions: ["매", "매", "주", "수"] },
+            { character: "無", meaning: "없을", sound: "무", grade: 5, options: ["없을", "있을", "빌", "찰"], soundOptions: ["무", "유", "공", "만"] },
+            { character: "倍", meaning: "곱", sound: "배", grade: 5, options: ["곱", "배", "두배", "절반"], soundOptions: ["배", "배", "배", "반"] },
+            { character: "比", meaning: "견줄", sound: "비", grade: 5, options: ["견줄", "같을", "비교할", "다를"], soundOptions: ["비", "동", "교", "이"] },
+            { character: "費", meaning: "쓸", sound: "비", grade: 5, options: ["쓸", "아낄", "낭비할", "저축할"], soundOptions: ["비", "약", "비", "축"] },
+            { character: "鼻", meaning: "코", sound: "비", grade: 5, options: ["코", "입", "귀", "눈"], soundOptions: ["비", "구", "이", "목"] },
+            { character: "氷", meaning: "얼음", sound: "빙", grade: 5, options: ["얼음", "물", "불", "김"], soundOptions: ["빙", "수", "화", "기"] },
+            { character: "寫", meaning: "베낄", sound: "사", grade: 5, options: ["베낄", "쓸", "그릴", "지울"], soundOptions: ["사", "서", "화", "삭"] },
+            { character: "思", meaning: "생각", sound: "사", grade: 5, options: ["생각", "기억", "꿈", "망각"], soundOptions: ["사", "억", "몽", "망"] },
+            { character: "査", meaning: "조사할", sound: "사", grade: 5, options: ["조사할", "알", "찾을", "숨길"], soundOptions: ["사", "지", "탐", "은"] },
+            { character: "賞", meaning: "상줄", sound: "상", grade: 5, options: ["상줄", "벌할", "칭찬할", "꾸짖을"], soundOptions: ["상", "벌", "찬", "질"] },
+            { character: "序", meaning: "차례", sound: "서", grade: 5, options: ["차례", "순서", "질서", "무질서"], soundOptions: ["서", "순", "질", "무"] },
+            { character: "善", meaning: "착할", sound: "선", grade: 5, options: ["착할", "악할", "좋을", "나쁠"], soundOptions: ["선", "악", "선", "악"] },
+            { character: "選", meaning: "가릴", sound: "선", grade: 5, options: ["가릴", "모을", "선택할", "버릴"], soundOptions: ["선", "집", "택", "폐"] },
+            { character: "船", meaning: "배", sound: "선", grade: 5, options: ["배", "차", "비행기", "기차"], soundOptions: ["선", "차", "기", "차"] },
+            { character: "示", meaning: "보일", sound: "시", grade: 5, options: ["보일", "숨길", "나타날", "가릴"], soundOptions: ["시", "은", "현", "은"] },
+            { character: "案", meaning: "책상", sound: "안", grade: 5, options: ["책상", "의자", "침대", "소파"], soundOptions: ["안", "의", "침", "소"] },
+            { character: "漁", meaning: "고기잡을", sound: "어", grade: 5, options: ["고기잡을", "낚시할", "잡을", "놓을"], soundOptions: ["어", "낚", "포", "방"] },
+            { character: "魚", meaning: "고기", sound: "어", grade: 5, options: ["고기", "물고기", "새", "짐승"], soundOptions: ["어", "어", "조", "수"] },
+            { character: "億", meaning: "억", sound: "억", grade: 5, options: ["억", "만", "천", "백"], soundOptions: ["억", "만", "천", "백"] },
+            { character: "熱", meaning: "더울", sound: "열", grade: 5, options: ["더울", "차가울", "따뜻할", "시원할"], soundOptions: ["열", "냉", "온", "량"] },
+            { character: "葉", meaning: "잎", sound: "엽", grade: 5, options: ["잎", "가지", "뿌리", "꽃"], soundOptions: ["엽", "지", "근", "화"] },
+            { character: "屋", meaning: "집", sound: "옥", grade: 5, options: ["집", "방", "건물", "마당"], soundOptions: ["옥", "실", "건", "장"] },
+            { character: "完", meaning: "완전할", sound: "완", grade: 5, options: ["완전할", "부족할", "완성할", "미완성할"], soundOptions: ["완", "부", "성", "미"] },
+            { character: "曜", meaning: "빛날", sound: "요", grade: 5, options: ["빛날", "어두울", "밝을", "흐릴"], soundOptions: ["요", "암", "명", "흐"] },
+            { character: "浴", meaning: "목욕할", sound: "욕", grade: 5, options: ["목욕할", "씻을", "감을", "더러울"], soundOptions: ["욕", "세", "감", "오"] },
+            { character: "牛", meaning: "소", sound: "우", grade: 5, options: ["소", "말", "양", "돼지"], soundOptions: ["우", "마", "양", "돈"] },
+            { character: "雄", meaning: "수컷", sound: "웅", grade: 5, options: ["수컷", "암컷", "남자", "여자"], soundOptions: ["웅", "자", "남", "녀"] },
+            { character: "原", meaning: "언덕", sound: "원", grade: 5, options: ["언덕", "평야", "산", "골짜기"], soundOptions: ["원", "야", "산", "곡"] },
+            { character: "院", meaning: "집", sound: "원", grade: 5, options: ["집", "원", "건물", "방"], soundOptions: ["원", "원", "건", "실"] },
+            { character: "願", meaning: "원할", sound: "원", grade: 5, options: ["원할", "거부할", "바랄", "거절할"], soundOptions: ["원", "거", "바", "거"] },
+            { character: "位", meaning: "자리", sound: "위", grade: 5, options: ["자리", "위치", "곳", "장소"], soundOptions: ["위", "치", "처", "장"] },
+            { character: "耳", meaning: "귀", sound: "이", grade: 5, options: ["귀", "코", "입", "눈"], soundOptions: ["이", "비", "구", "목"] },
+            { character: "因", meaning: "인할", sound: "인", grade: 5, options: ["인할", "의할", "따를", "어긋날"], soundOptions: ["인", "의", "종", "위"] },
+            { character: "災", meaning: "재앙", sound: "재", grade: 5, options: ["재앙", "복", "행운", "불운"], soundOptions: ["재", "복", "행", "불"] },
+            { character: "再", meaning: "두", sound: "재", grade: 5, options: ["두", "다시", "또", "한"], soundOptions: ["재", "재", "재", "일"] },
+            { character: "爭", meaning: "다툴", sound: "쟁", grade: 5, options: ["다툴", "협력할", "싸울", "화해할"], soundOptions: ["쟁", "협", "투", "화"] },
+            { character: "貯", meaning: "쌓을", sound: "저", grade: 5, options: ["쌓을", "버릴", "모을", "흩을"], soundOptions: ["저", "폐", "집", "산"] },
+            { character: "赤", meaning: "붉을", sound: "적", grade: 5, options: ["붉을", "푸를", "노랄", "흰"], soundOptions: ["적", "청", "황", "백"] },
+            { character: "停", meaning: "머물", sound: "정", grade: 5, options: ["머물", "떠날", "갈", "올"], soundOptions: ["정", "거", "거", "래"] },
+            { character: "操", meaning: "잡을", sound: "조", grade: 5, options: ["잡을", "놓을", "쥘", "버릴"], soundOptions: ["조", "방", "집", "폐"] },
+            { character: "終", meaning: "마칠", sound: "종", grade: 5, options: ["마칠", "시작할", "끝낼", "계속할"], soundOptions: ["종", "시", "종", "계"] },
+            { character: "罪", meaning: "허물", sound: "죄", grade: 5, options: ["허물", "죄", "잘못", "공"], soundOptions: ["죄", "죄", "과", "공"] },
+            { character: "止", meaning: "그칠", sound: "지", grade: 5, options: ["그칠", "계속할", "멈출", "갈"], soundOptions: ["지", "계", "정", "행"] },
+            { character: "唱", meaning: "부를", sound: "창", grade: 5, options: ["부를", "노래할", "말할", "침묵할"], soundOptions: ["창", "가", "언", "묵"] },
+            { character: "鐵", meaning: "쇠", sound: "철", grade: 5, options: ["쇠", "금", "은", "동"], soundOptions: ["철", "금", "은", "동"] },
+            { character: "初", meaning: "처음", sound: "초", grade: 5, options: ["처음", "끝", "중간", "마지막"], soundOptions: ["초", "종", "중", "종"] },
+            { character: "最", meaning: "가장", sound: "최", grade: 5, options: ["가장", "조금", "많을", "적을"], soundOptions: ["최", "소", "다", "소"] },
+            { character: "祝", meaning: "빌", sound: "축", grade: 5, options: ["빌", "기도할", "축복할", "저주할"], soundOptions: ["축", "기", "복", "저"] },
+            { character: "致", meaning: "이를", sound: "치", grade: 5, options: ["이를", "떠날", "갈", "올"], soundOptions: ["치", "거", "거", "래"] },
+            { character: "則", meaning: "법칙", sound: "칙", grade: 5, options: ["법칙", "규칙", "법", "제도"], soundOptions: ["칙", "규", "법", "제"] },
+            { character: "他", meaning: "다를", sound: "타", grade: 5, options: ["다를", "같을", "다른", "일치할"], soundOptions: ["타", "동", "이", "일"] },
+            { character: "打", meaning: "칠", sound: "타", grade: 5, options: ["칠", "때릴", "두드릴", "어루만질"], soundOptions: ["타", "타", "타", "무"] },
+            { character: "卓", meaning: "높을", sound: "탁", grade: 5, options: ["높을", "낮을", "탁월할", "평범할"], soundOptions: ["탁", "저", "탁", "범"] },
+            { character: "炭", meaning: "숯", sound: "탄", grade: 5, options: ["숯", "불", "나무", "돌"], soundOptions: ["탄", "화", "목", "석"] },
+            { character: "板", meaning: "널", sound: "판", grade: 5, options: ["널", "판", "나무", "돌"], soundOptions: ["판", "판", "목", "석"] },
+            { character: "敗", meaning: "패할", sound: "패", grade: 5, options: ["패할", "이길", "승리할", "실패할"], soundOptions: ["패", "승", "승", "실"] },
+            { character: "河", meaning: "물", sound: "하", grade: 5, options: ["물", "강", "바다", "호수"], soundOptions: ["하", "강", "해", "호"] },
+            { character: "寒", meaning: "찰", sound: "한", grade: 5, options: ["찰", "더울", "따뜻할", "시원할"], soundOptions: ["한", "열", "온", "량"] },
+            { character: "許", meaning: "허락할", sound: "허", grade: 5, options: ["허락할", "금할", "허용할", "거부할"], soundOptions: ["허", "금", "용", "거"] },
+            { character: "湖", meaning: "호수", sound: "호", grade: 5, options: ["호수", "강", "바다", "연못"], soundOptions: ["호", "강", "해", "연"] },
+            { character: "患", meaning: "근심", sound: "환", grade: 5, options: ["근심", "걱정", "기쁨", "즐거움"], soundOptions: ["환", "우", "희", "락"] },
+            { character: "黑", meaning: "검을", sound: "흑", grade: 5, options: ["검을", "흰", "붉을", "푸를"], soundOptions: ["흑", "백", "적", "청"] },
+            
+            // 4급 한자
+            { character: "暇", meaning: "틈/겨를", sound: "가", grade: 4, options: ["틈/겨를", "바쁠", "일할", "쉴"], soundOptions: ["가", "분", "일", "휴"] },
+            { character: "刻", meaning: "새길", sound: "각", grade: 4, options: ["새길", "지울", "그릴", "쓸"], soundOptions: ["각", "삭", "화", "서"] },
+            { character: "覺", meaning: "깨달을", sound: "각", grade: 4, options: ["깨달을", "모를", "알", "잊을"], soundOptions: ["각", "미", "지", "망"] },
+            { character: "簡", meaning: "대쪽/간략할", sound: "간", grade: 4, options: ["대쪽/간략할", "복잡할", "쉬울", "어려울"], soundOptions: ["간", "복", "이", "난"] },
+            { character: "看", meaning: "볼", sound: "간", grade: 4, options: ["볼", "보이지", "알", "모를"], soundOptions: ["간", "불", "지", "미"] },
+            { character: "干", meaning: "방패", sound: "간", grade: 4, options: ["방패", "칼", "창", "활"], soundOptions: ["간", "도", "창", "궁"] },
+            { character: "甘", meaning: "달", sound: "감", grade: 4, options: ["달", "쓸", "맵", "시"], soundOptions: ["감", "고", "신", "산"] },
+            { character: "敢", meaning: "감히/구태여", sound: "감", grade: 4, options: ["감히/구태여", "겁낼", "용감할", "두려울"], soundOptions: ["감", "공", "용", "공"] },
+            { character: "甲", meaning: "갑옷", sound: "갑", grade: 4, options: ["갑옷", "옷", "모자", "신발"], soundOptions: ["갑", "의", "모", "신"] },
+            { character: "降", meaning: "내릴", sound: "강", grade: 4, options: ["내릴", "오를", "올라갈", "떨어질"], soundOptions: ["강", "등", "상", "락"] },
+            { character: "拒", meaning: "막을", sound: "거", grade: 4, options: ["막을", "허용할", "거부할", "받을"], soundOptions: ["거", "허", "거", "수"] },
+            { character: "居", meaning: "살", sound: "거", grade: 4, options: ["살", "떠날", "올", "갈"], soundOptions: ["거", "거", "래", "거"] },
+            { character: "據", meaning: "근거", sound: "거", grade: 4, options: ["근거", "증거", "이유", "원인"], soundOptions: ["거", "증", "유", "인"] },
+            { character: "巨", meaning: "클", sound: "거", grade: 4, options: ["클", "작을", "큰", "작은"], soundOptions: ["거", "소", "대", "소"] },
+            { character: "傑", meaning: "뛰어날", sound: "걸", grade: 4, options: ["뛰어날", "평범할", "훌륭할", "보통"], soundOptions: ["걸", "범", "훌", "보"] },
+            { character: "儉", meaning: "검소할", sound: "검", grade: 4, options: ["검소할", "사치할", "절약할", "낭비할"], soundOptions: ["검", "사", "절", "비"] },
+            { character: "擊", meaning: "칠", sound: "격", grade: 4, options: ["칠", "때릴", "두드릴", "어루만질"], soundOptions: ["격", "타", "타", "무"] },
+            { character: "激", meaning: "격할", sound: "격", grade: 4, options: ["격할", "차분할", "격렬할", "온화할"], soundOptions: ["격", "차", "격", "온"] },
+            { character: "堅", meaning: "굳을", sound: "견", grade: 4, options: ["굳을", "부드러울", "단단할", "약할"], soundOptions: ["견", "유", "단", "약"] },
+            { character: "犬", meaning: "개", sound: "견", grade: 4, options: ["개", "고양이", "소", "말"], soundOptions: ["견", "묘", "우", "마"] },
+            { character: "驚", meaning: "놀랄", sound: "경", grade: 4, options: ["놀랄", "평정할", "깜짝", "안정할"], soundOptions: ["경", "정", "깜", "안"] },
+            { character: "更", meaning: "고칠", sound: "경", grade: 4, options: ["고칠", "그대로", "바꿀", "고정할"], soundOptions: ["경", "유", "변", "고"] },
+            { character: "傾", meaning: "기울", sound: "경", grade: 4, options: ["기울", "곧을", "휠", "바를"], soundOptions: ["경", "직", "휴", "정"] },
+            { character: "鏡", meaning: "거울", sound: "경", grade: 4, options: ["거울", "유리", "창문", "벽"], soundOptions: ["경", "유", "창", "벽"] },
+            { character: "階", meaning: "섬돌", sound: "계", grade: 4, options: ["섬돌", "계단", "층", "바닥"], soundOptions: ["계", "단", "층", "바"] },
+            { character: "鷄", meaning: "닭", sound: "계", grade: 4, options: ["닭", "오리", "거위", "새"], soundOptions: ["계", "압", "아", "조"] },
+            { character: "季", meaning: "계절", sound: "계", grade: 4, options: ["계절", "봄", "여름", "가을"], soundOptions: ["계", "춘", "하", "추"] },
+            { character: "系", meaning: "이어맬", sound: "계", grade: 4, options: ["이어맬", "끊을", "연결할", "분리할"], soundOptions: ["계", "단", "연", "분"] },
+            { character: "繼", meaning: "이을", sound: "계", grade: 4, options: ["이을", "끊을", "연결할", "분리할"], soundOptions: ["계", "단", "연", "분"] },
+            { character: "戒", meaning: "경계할", sound: "계", grade: 4, options: ["경계할", "무시할", "조심할", "소홀히"], soundOptions: ["계", "무", "조", "소"] },
+            { character: "孤", meaning: "외로울", sound: "고", grade: 4, options: ["외로울", "함께", "혼자", "여럿"], soundOptions: ["고", "공", "혼", "여"] },
+            { character: "庫", meaning: "곳집", sound: "고", grade: 4, options: ["곳집", "창고", "방", "마당"], soundOptions: ["고", "창", "방", "장"] },
+            { character: "穀", meaning: "곡식", sound: "곡", grade: 4, options: ["곡식", "쌀", "보리", "밀"], soundOptions: ["곡", "미", "맥", "소"] },
+            { character: "困", meaning: "곤할", sound: "곤", grade: 4, options: ["곤할", "편할", "어려울", "쉬울"], soundOptions: ["곤", "편", "난", "이"] },
+            { character: "骨", meaning: "뼈", sound: "골", grade: 4, options: ["뼈", "살", "피", "근육"], soundOptions: ["골", "육", "혈", "근"] },
+            { character: "孔", meaning: "구멍", sound: "공", grade: 4, options: ["구멍", "막힐", "뚫을", "막을"], soundOptions: ["공", "체", "통", "막"] },
+            { character: "攻", meaning: "칠", sound: "공", grade: 4, options: ["칠", "방어할", "공격할", "지킬"], soundOptions: ["공", "방", "공", "지"] },
+            { character: "管", meaning: "대롱/주관할", sound: "관", grade: 4, options: ["대롱/주관할", "막을", "관리할", "무시할"], soundOptions: ["관", "막", "리", "무"] },
+            { character: "鑛", meaning: "쇳돌", sound: "광", grade: 4, options: ["쇳돌", "돌", "금", "은"], soundOptions: ["광", "석", "금", "은"] },
+            { character: "構", meaning: "얽을", sound: "구", grade: 4, options: ["얽을", "풀", "만들", "부술"], soundOptions: ["구", "해", "작", "파"] },
+            { character: "君", meaning: "임금", sound: "군", grade: 4, options: ["임금", "신하", "백성", "관리"], soundOptions: ["군", "신", "민", "관"] },
+            { character: "群", meaning: "무리", sound: "군", grade: 4, options: ["무리", "혼자", "모을", "흩을"], soundOptions: ["군", "독", "집", "산"] },
+            { character: "屈", meaning: "굽힐", sound: "굴", grade: 4, options: ["굽힐", "펼", "구부릴", "바를"], soundOptions: ["굴", "전", "구", "정"] },
+            { character: "窮", meaning: "다할/궁할", sound: "궁", grade: 4, options: ["다할/궁할", "풍부할", "가난할", "부유할"], soundOptions: ["궁", "풍", "빈", "부"] },
+            { character: "券", meaning: "문서", sound: "권", grade: 4, options: ["문서", "증서", "계약", "약속"], soundOptions: ["권", "증", "계", "약"] },
+            { character: "勸", meaning: "권할", sound: "권", grade: 4, options: ["권할", "말릴", "권유할", "거부할"], soundOptions: ["권", "말", "유", "거"] },
+            { character: "卷", meaning: "책", sound: "권", grade: 4, options: ["책", "문서", "종이", "글"], soundOptions: ["권", "문", "지", "서"] },
+            { character: "歸", meaning: "돌아갈", sound: "귀", grade: 4, options: ["돌아갈", "떠날", "올", "갈"], soundOptions: ["귀", "거", "래", "거"] },
+            { character: "均", meaning: "고를", sound: "균", grade: 4, options: ["고를", "불균등할", "같을", "다를"], soundOptions: ["균", "불", "동", "이"] },
+            { character: "劇", meaning: "심할", sound: "극", grade: 4, options: ["심할", "약할", "강할", "부드러울"], soundOptions: ["극", "약", "강", "유"] },
+            { character: "勤", meaning: "부지런할", sound: "근", grade: 4, options: ["부지런할", "게으를", "열심히", "소홀히"], soundOptions: ["근", "태", "열", "소"] },
+            { character: "筋", meaning: "힘줄", sound: "근", grade: 4, options: ["힘줄", "뼈", "살", "피"], soundOptions: ["근", "골", "육", "혈"] },
+            { character: "機", meaning: "틀", sound: "기", grade: 4, options: ["틀", "기계", "도구", "장치"], soundOptions: ["기", "계", "구", "치"] },
+            { character: "寄", meaning: "부칠", sound: "기", grade: 4, options: ["부칠", "받을", "보낼", "가져올"], soundOptions: ["기", "수", "송", "래"] },
+            { character: "奇", meaning: "기특할", sound: "기", grade: 4, options: ["기특할", "평범할", "특별할", "보통"], soundOptions: ["기", "범", "특", "보"] },
+            { character: "紀", meaning: "벼리", sound: "기", grade: 4, options: ["벼리", "끝", "시작", "중간"], soundOptions: ["기", "말", "시", "중"] },
+            { character: "納", meaning: "들일", sound: "납", grade: 4, options: ["들일", "내보낼", "받을", "줄"], soundOptions: ["납", "출", "수", "지"] },
+            { character: "段", meaning: "층계", sound: "단", grade: 4, options: ["층계", "단계", "등급", "수준"], soundOptions: ["단", "계", "급", "준"] },
+            { character: "徒", meaning: "무리", sound: "도", grade: 4, options: ["무리", "혼자", "모을", "흩을"], soundOptions: ["도", "독", "집", "산"] },
+            { character: "盜", meaning: "도둑", sound: "도", grade: 4, options: ["도둑", "경찰", "범인", "피해자"], soundOptions: ["도", "경", "범", "피"] },
+            { character: "逃", meaning: "도망할", sound: "도", grade: 4, options: ["도망할", "쫓을", "따를", "만날"], soundOptions: ["도", "추", "종", "만"] },
+            { character: "亂", meaning: "어지러울", sound: "란", grade: 4, options: ["어지러울", "정리할", "혼란할", "정돈할"], soundOptions: ["란", "정", "혼", "정"] },
+            { character: "卵", meaning: "알", sound: "란", grade: 4, options: ["알", "새", "닭", "부화"], soundOptions: ["란", "조", "계", "부"] },
+            { character: "覽", meaning: "볼", sound: "람", grade: 4, options: ["볼", "보이지", "알", "모를"], soundOptions: ["람", "불", "지", "미"] },
+            { character: "略", meaning: "간략할/약할", sound: "략", grade: 4, options: ["간략할/약할", "상세할", "간단할", "복잡할"], soundOptions: ["략", "상", "간", "복"] },
+            { character: "糧", meaning: "양식", sound: "량", grade: 4, options: ["양식", "음식", "식량", "먹을"], soundOptions: ["량", "식", "량", "식"] },
+            { character: "慮", meaning: "생각할", sound: "려", grade: 4, options: ["생각할", "무시할", "고민할", "소홀히"], soundOptions: ["려", "무", "고", "소"] },
+            { character: "烈", meaning: "매울", sound: "렬", grade: 4, options: ["매울", "순한", "강할", "약할"], soundOptions: ["렬", "순", "강", "약"] },
+            { character: "龍", meaning: "용", sound: "룡", grade: 4, options: ["용", "뱀", "물고기", "새"], soundOptions: ["룡", "사", "어", "조"] },
+            { character: "柳", meaning: "버들", sound: "류", grade: 4, options: ["버들", "소나무", "대나무", "나무"], soundOptions: ["류", "송", "죽", "목"] },
+            { character: "輪", meaning: "바퀴", sound: "륜", grade: 4, options: ["바퀴", "원", "고리", "테"], soundOptions: ["륜", "원", "환", "테"] },
+            { character: "離", meaning: "떠날", sound: "리", grade: 4, options: ["떠날", "만날", "올", "갈"], soundOptions: ["리", "만", "래", "거"] },
+            { character: "妹", meaning: "누이", sound: "매", grade: 4, options: ["누이", "형", "아우", "언니"], soundOptions: ["매", "형", "제", "언"] },
+            { character: "勉", meaning: "힘쓸", sound: "면", grade: 4, options: ["힘쓸", "게으를", "노력할", "소홀히"], soundOptions: ["면", "태", "노", "소"] },
+            { character: "鳴", meaning: "울", sound: "명", grade: 4, options: ["울", "조용할", "소리낼", "침묵할"], soundOptions: ["명", "정", "음", "묵"] },
+            { character: "模", meaning: "본뜰", sound: "모", grade: 4, options: ["본뜰", "원본", "모방할", "창조할"], soundOptions: ["모", "원", "방", "조"] },
+            { character: "墓", meaning: "무덤", sound: "묘", grade: 4, options: ["무덤", "묘지", "산", "땅"], soundOptions: ["묘", "지", "산", "지"] },
+            { character: "妙", meaning: "묘할", sound: "묘", grade: 4, options: ["묘할", "평범할", "신기할", "보통"], soundOptions: ["묘", "범", "신", "보"] },
+            { character: "舞", meaning: "춤출", sound: "무", grade: 4, options: ["춤출", "서있을", "움직일", "정지할"], soundOptions: ["무", "정", "동", "정"] },
+            { character: "拍", meaning: "칠", sound: "박", grade: 4, options: ["칠", "때릴", "두드릴", "어루만질"], soundOptions: ["박", "타", "타", "무"] },
+            { character: "髮", meaning: "터럭", sound: "발", grade: 4, options: ["터럭", "머리카락", "털", "가죽"], soundOptions: ["발", "모", "털", "피"] },
+            { character: "妨", meaning: "방해할", sound: "방", grade: 4, options: ["방해할", "도울", "막을", "허용할"], soundOptions: ["방", "조", "막", "허"] },
+            { character: "犯", meaning: "범할", sound: "범", grade: 4, options: ["범할", "지킬", "어길", "따를"], soundOptions: ["범", "지", "위", "종"] },
+            { character: "範", meaning: "법", sound: "범", grade: 4, options: ["법", "규칙", "제도", "원칙"], soundOptions: ["범", "규", "제", "원"] },
+            { character: "辯", meaning: "말씀", sound: "변", grade: 4, options: ["말씀", "침묵", "대화", "글"], soundOptions: ["변", "묵", "화", "서"] },
+            { character: "普", meaning: "넓을", sound: "보", grade: 4, options: ["넓을", "좁을", "큰", "작은"], soundOptions: ["보", "협", "대", "소"] },
+            { character: "伏", meaning: "엎드릴", sound: "복", grade: 4, options: ["엎드릴", "일어날", "숨을", "나타날"], soundOptions: ["복", "기", "은", "현"] },
+            { character: "複", meaning: "겹칠", sound: "복", grade: 4, options: ["겹칠", "단일할", "중복할", "하나"], soundOptions: ["복", "단", "중", "일"] },
+            { character: "否", meaning: "아닐", sound: "부", grade: 4, options: ["아닐", "맞을", "옳을", "틀릴"], soundOptions: ["부", "시", "정", "오"] },
+            { character: "負", meaning: "질", sound: "부", grade: 4, options: ["질", "이길", "패할", "승리할"], soundOptions: ["부", "승", "패", "승"] },
+            { character: "粉", meaning: "가루", sound: "분", grade: 4, options: ["가루", "덩어리", "고체", "액체"], soundOptions: ["분", "괴", "체", "액"] },
+            { character: "憤", meaning: "분할", sound: "분", grade: 4, options: ["분할", "기쁠", "화날", "즐거울"], soundOptions: ["분", "희", "화", "락"] },
+            { character: "批", meaning: "비평할", sound: "비", grade: 4, options: ["비평할", "칭찬할", "꾸짖을", "칭찬할"], soundOptions: ["비", "찬", "질", "찬"] },
+            { character: "祕", meaning: "숨길", sound: "비", grade: 4, options: ["숨길", "보일", "은밀할", "공개할"], soundOptions: ["비", "시", "은", "공"] },
+            { character: "碑", meaning: "비석", sound: "비", grade: 4, options: ["비석", "돌", "기념물", "표지"], soundOptions: ["비", "석", "기", "표"] },
+            { character: "辭", meaning: "말씀", sound: "사", grade: 4, options: ["말씀", "침묵", "대화", "글"], soundOptions: ["사", "묵", "화", "서"] },
+            { character: "私", meaning: "사사", sound: "사", grade: 4, options: ["사사", "공공", "개인", "공식"], soundOptions: ["사", "공", "개", "공"] },
+            { character: "絲", meaning: "실", sound: "사", grade: 4, options: ["실", "천", "가죽", "나무"], soundOptions: ["사", "천", "혁", "목"] },
+            { character: "射", meaning: "쏠", sound: "사", grade: 4, options: ["쏠", "받을", "던질", "잡을"], soundOptions: ["사", "수", "투", "포"] },
+            { character: "散", meaning: "흩을", sound: "산", grade: 4, options: ["흩을", "모을", "분산할", "집중할"], soundOptions: ["산", "집", "분", "집"] },
+            { character: "傷", meaning: "다칠", sound: "상", grade: 4, options: ["다칠", "치유할", "아플", "낫을"], soundOptions: ["상", "치", "병", "완"] },
+            { character: "象", meaning: "코끼리", sound: "상", grade: 4, options: ["코끼리", "호랑이", "사자", "곰"], soundOptions: ["상", "호", "사", "웅"] },
+            { character: "宣", meaning: "베풀", sound: "선", grade: 4, options: ["베풀", "숨길", "공개할", "은밀할"], soundOptions: ["선", "은", "공", "은"] },
+            { character: "舌", meaning: "혀", sound: "설", grade: 4, options: ["혀", "입", "코", "귀"], soundOptions: ["설", "구", "비", "이"] },
+            { character: "屬", meaning: "붙일", sound: "속", grade: 4, options: ["붙일", "떼어낼", "연결할", "분리할"], soundOptions: ["속", "분", "연", "분"] },
+            { character: "損", meaning: "덜", sound: "손", grade: 4, options: ["덜", "더할", "줄일", "늘릴"], soundOptions: ["손", "가", "감", "증"] },
+            { character: "頌", meaning: "기릴/칭송할", sound: "송", grade: 4, options: ["기릴/칭송할", "비난할", "칭찬할", "꾸짖을"], soundOptions: ["송", "비", "찬", "질"] },
+            { character: "松", meaning: "소나무", sound: "송", grade: 4, options: ["소나무", "대나무", "버들", "나무"], soundOptions: ["송", "죽", "류", "목"] },
+            { character: "秀", meaning: "빼어날", sound: "수", grade: 4, options: ["빼어날", "평범할", "훌륭할", "보통"], soundOptions: ["수", "범", "훌", "보"] },
+            { character: "叔", meaning: "아재비", sound: "숙", grade: 4, options: ["아재비", "아버지", "어머니", "형"], soundOptions: ["숙", "부", "모", "형"] },
+            { character: "肅", meaning: "엄숙할", sound: "숙", grade: 4, options: ["엄숙할", "가벼울", "진지할", "장난스러울"], soundOptions: ["숙", "경", "진", "희"] },
+            { character: "崇", meaning: "높을", sound: "숭", grade: 4, options: ["높을", "낮을", "존경할", "업신여길"], soundOptions: ["숭", "저", "존", "업"] },
+            { character: "氏", meaning: "각시/성씨", sound: "씨", grade: 4, options: ["각시/성씨", "이름", "호", "별명"], soundOptions: ["씨", "명", "호", "별"] },
+            { character: "額", meaning: "이마", sound: "액", grade: 4, options: ["이마", "코", "입", "귀"], soundOptions: ["액", "비", "구", "이"] },
+            { character: "樣", meaning: "모양", sound: "양", grade: 4, options: ["모양", "형태", "모습", "외관"], soundOptions: ["양", "형", "모", "외"] },
+            { character: "嚴", meaning: "엄할", sound: "엄", grade: 4, options: ["엄할", "관대할", "엄격할", "온화할"], soundOptions: ["엄", "관", "격", "온"] },
+            { character: "與", meaning: "더불/줄", sound: "여", grade: 4, options: ["더불/줄", "받을", "주", "가져올"], soundOptions: ["여", "수", "지", "래"] },
+            { character: "域", meaning: "지경", sound: "역", grade: 4, options: ["지경", "경계", "한계", "끝"], soundOptions: ["역", "계", "한", "말"] },
+            { character: "易", meaning: "바꿀", sound: "역", grade: 4, options: ["바꿀", "그대로", "변할", "고정할"], soundOptions: ["역", "유", "변", "고"] },
+            { character: "燃", meaning: "탈", sound: "연", grade: 4, options: ["탈", "꺼질", "불", "물"], soundOptions: ["연", "소", "화", "수"] },
+            { character: "鉛", meaning: "납", sound: "연", grade: 4, options: ["납", "금", "은", "철"], soundOptions: ["연", "금", "은", "철"] },
+            { character: "緣", meaning: "인연", sound: "연", grade: 4, options: ["인연", "관계", "연결", "분리"], soundOptions: ["연", "계", "연", "분"] },
+            { character: "延", meaning: "늘일", sound: "연", grade: 4, options: ["늘일", "줄일", "연장할", "단축할"], soundOptions: ["연", "단", "연", "단"] },
+            { character: "迎", meaning: "맞을", sound: "영", grade: 4, options: ["맞을", "보낼", "환영할", "거부할"], soundOptions: ["영", "송", "환", "거"] },
+            { character: "映", meaning: "비칠", sound: "영", grade: 4, options: ["비칠", "어두울", "반사할", "흡수할"], soundOptions: ["영", "암", "반", "흡"] },
+            { character: "營", meaning: "경영할", sound: "영", grade: 4, options: ["경영할", "관리할", "운영할", "중단할"], soundOptions: ["영", "관", "운", "중"] },
+            { character: "豫", meaning: "미리", sound: "예", grade: 4, options: ["미리", "나중", "예상할", "후회할"], soundOptions: ["예", "후", "예", "후"] },
+            { character: "優", meaning: "넉넉할", sound: "우", grade: 4, options: ["넉넉할", "부족할", "풍부할", "가난할"], soundOptions: ["우", "부", "풍", "빈"] },
+            { character: "遇", meaning: "만날", sound: "우", grade: 4, options: ["만날", "헤어질", "만남", "이별"], soundOptions: ["우", "리", "만", "별"] },
+            { character: "郵", meaning: "우편", sound: "우", grade: 4, options: ["우편", "편지", "소포", "전화"], soundOptions: ["우", "편", "포", "화"] },
+            { character: "怨", meaning: "원망할", sound: "원", grade: 4, options: ["원망할", "감사할", "화날", "기쁠"], soundOptions: ["원", "감", "화", "희"] },
+            { character: "援", meaning: "도울", sound: "원", grade: 4, options: ["도울", "방해할", "지원할", "거부할"], soundOptions: ["원", "방", "지", "거"] },
+            { character: "源", meaning: "근원", sound: "원", grade: 4, options: ["근원", "끝", "시작", "결과"], soundOptions: ["원", "말", "시", "과"] },
+            { character: "圍", meaning: "에워쌀", sound: "위", grade: 4, options: ["에워쌀", "풀", "포위할", "해방할"], soundOptions: ["위", "해", "포", "해"] },
+            { character: "委", meaning: "맡길", sound: "위", grade: 4, options: ["맡길", "거부할", "위임할", "직접할"], soundOptions: ["위", "거", "임", "직"] },
+            { character: "威", meaning: "위엄", sound: "위", grade: 4, options: ["위엄", "겸손", "권위", "무력"], soundOptions: ["위", "겸", "권", "무"] },
+            { character: "慰", meaning: "위로할", sound: "위", grade: 4, options: ["위로할", "꾸짖을", "안심시킬", "걱정시킬"], soundOptions: ["위", "질", "안", "우"] },
+            { character: "危", meaning: "위태할", sound: "위", grade: 4, options: ["위태할", "안전할", "위험할", "안전할"], soundOptions: ["위", "안", "위", "안"] },
+            { character: "遊", meaning: "놀", sound: "유", grade: 4, options: ["놀", "일할", "공부할", "쉴"], soundOptions: ["유", "일", "학", "휴"] },
+            { character: "乳", meaning: "젖", sound: "유", grade: 4, options: ["젖", "우유", "음료", "물"], soundOptions: ["유", "우", "음", "수"] },
+            { character: "儒", meaning: "선비", sound: "유", grade: 4, options: ["선비", "학자", "지식인", "무식자"], soundOptions: ["유", "학", "지", "무"] },
+            { character: "遺", meaning: "남길", sound: "유", grade: 4, options: ["남길", "잃을", "버릴", "가질"], soundOptions: ["유", "실", "폐", "유"] },
+            { character: "隱", meaning: "숨을", sound: "은", grade: 4, options: ["숨을", "나타날", "은밀할", "공개할"], soundOptions: ["은", "현", "은", "공"] },
+            { character: "依", meaning: "의지할", sound: "의", grade: 4, options: ["의지할", "독립할", "믿을", "의심할"], soundOptions: ["의", "독", "신", "의"] },
+            { character: "儀", meaning: "거동", sound: "의", grade: 4, options: ["거동", "행동", "예의", "무례"], soundOptions: ["의", "행", "예", "무"] },
+            { character: "疑", meaning: "의심할", sound: "의", grade: 4, options: ["의심할", "믿을", "확신할", "불신할"], soundOptions: ["의", "신", "확", "불"] },
+            { character: "異", meaning: "다를", sound: "이", grade: 4, options: ["다를", "같을", "비슷할", "일치할"], soundOptions: ["이", "동", "유", "일"] },
+            { character: "仁", meaning: "어질", sound: "인", grade: 4, options: ["어질", "악할", "착할", "나쁠"], soundOptions: ["인", "악", "선", "악"] },
+            { character: "資", meaning: "재물", sound: "자", grade: 4, options: ["재물", "돈", "자산", "부채"], soundOptions: ["자", "전", "산", "채"] },
+            { character: "姿", meaning: "모양", sound: "자", grade: 4, options: ["모양", "형태", "모습", "외관"], soundOptions: ["자", "형", "모", "외"] },
+            { character: "姉", meaning: "손윗누이", sound: "자", grade: 4, options: ["손윗누이", "동생", "언니", "누나"], soundOptions: ["자", "제", "언", "누"] },
+            { character: "殘", meaning: "남을", sound: "잔", grade: 4, options: ["남을", "없을", "나머지", "전체"], soundOptions: ["잔", "무", "여", "전"] },
+            { character: "雜", meaning: "섞일", sound: "잡", grade: 4, options: ["섞일", "갈라질", "정리할", "정돈할"], soundOptions: ["잡", "분", "정", "정"] },
+            { character: "獎", meaning: "장려할", sound: "장", grade: 4, options: ["장려할", "벌할", "칭찬할", "꾸짖을"], soundOptions: ["장", "벌", "찬", "질"] },
+            { character: "裝", meaning: "꾸밀", sound: "장", grade: 4, options: ["꾸밀", "벗을", "장식할", "단순할"], soundOptions: ["장", "탈", "식", "단"] },
+            { character: "腸", meaning: "창자", sound: "장", grade: 4, options: ["창자", "위", "간", "심장"], soundOptions: ["장", "위", "간", "심"] },
+            { character: "張", meaning: "베풀", sound: "장", grade: 4, options: ["베풀", "접을", "펼칠", "말"], soundOptions: ["장", "접", "전", "말"] },
+            { character: "壯", meaning: "장할", sound: "장", grade: 4, options: ["장할", "약할", "강할", "부드러울"], soundOptions: ["장", "약", "강", "유"] },
+            { character: "帳", meaning: "장막", sound: "장", grade: 4, options: ["장막", "천막", "텐트", "집"], soundOptions: ["장", "천", "텐", "가"] },
+            { character: "底", meaning: "밑", sound: "저", grade: 4, options: ["밑", "위", "바닥", "천장"], soundOptions: ["저", "상", "바", "천"] },
+            { character: "積", meaning: "쌓을", sound: "적", grade: 4, options: ["쌓을", "버릴", "모을", "흩을"], soundOptions: ["적", "폐", "집", "산"] },
+            { character: "籍", meaning: "문서", sound: "적", grade: 4, options: ["문서", "책", "기록", "등록"], soundOptions: ["적", "서", "기", "등"] },
+            { character: "適", meaning: "맞을", sound: "적", grade: 4, options: ["맞을", "틀릴", "적합할", "부적절할"], soundOptions: ["적", "오", "합", "부"] },
+            { character: "績", meaning: "길쌈", sound: "적", grade: 4, options: ["길쌈", "실", "천", "가죽"], soundOptions: ["적", "사", "천", "혁"] },
+            { character: "賊", meaning: "도둑", sound: "적", grade: 4, options: ["도둑", "경찰", "범인", "피해자"], soundOptions: ["적", "경", "범", "피"] },
+            { character: "專", meaning: "오로지", sound: "전", grade: 4, options: ["오로지", "함께", "모두", "일부"], soundOptions: ["전", "공", "모", "일"] },
+            { character: "轉", meaning: "구를", sound: "전", grade: 4, options: ["구를", "직선", "회전할", "정지할"], soundOptions: ["전", "직", "회", "정"] },
+            { character: "錢", meaning: "돈", sound: "전", grade: 4, options: ["돈", "화폐", "자산", "부채"], soundOptions: ["전", "폐", "산", "채"] },
+            { character: "折", meaning: "꺾을", sound: "절", grade: 4, options: ["꺾을", "펼", "구부릴", "바를"], soundOptions: ["절", "전", "구", "정"] },
+            { character: "點", meaning: "점", sound: "점", grade: 4, options: ["점", "선", "면", "체"], soundOptions: ["점", "선", "면", "체"] },
+            { character: "占", meaning: "점령할/점칠", sound: "점", grade: 4, options: ["점령할/점칠", "잃을", "차지할", "포기할"], soundOptions: ["점", "실", "차", "포"] },
+            { character: "靜", meaning: "고요할", sound: "정", grade: 4, options: ["고요할", "시끄러울", "조용할", "소란할"], soundOptions: ["정", "요", "정", "란"] },
+            { character: "丁", meaning: "고무래/장정", sound: "정", grade: 4, options: ["고무래/장정", "도구", "사람", "물건"], soundOptions: ["정", "구", "인", "물"] },
+            { character: "整", meaning: "가지런할", sound: "정", grade: 4, options: ["가지런할", "어지러울", "정리할", "혼란할"], soundOptions: ["정", "란", "리", "란"] },
+            { character: "帝", meaning: "임금", sound: "제", grade: 4, options: ["임금", "신하", "백성", "관리"], soundOptions: ["제", "신", "민", "관"] },
+            { character: "條", meaning: "가지", sound: "조", grade: 4, options: ["가지", "줄기", "뿌리", "잎"], soundOptions: ["조", "간", "근", "엽"] },
+            { character: "潮", meaning: "밀물/조수", sound: "조", grade: 4, options: ["밀물/조수", "썰물", "바다", "강"], soundOptions: ["조", "썰", "해", "강"] },
+            { character: "組", meaning: "짤", sound: "조", grade: 4, options: ["짤", "풀", "만들", "부술"], soundOptions: ["조", "해", "작", "파"] },
+            { character: "存", meaning: "있을", sound: "존", grade: 4, options: ["있을", "없을", "살", "죽을"], soundOptions: ["존", "무", "생", "사"] },
+            { character: "鍾", meaning: "쇠북", sound: "종", grade: 4, options: ["쇠북", "북", "악기", "소리"], soundOptions: ["종", "북", "악", "음"] },
+            { character: "從", meaning: "좇을", sound: "종", grade: 4, options: ["좇을", "앞서갈", "따를", "거부할"], soundOptions: ["종", "선", "종", "거"] },
+            { character: "座", meaning: "자리", sound: "좌", grade: 4, options: ["자리", "위치", "곳", "장소"], soundOptions: ["좌", "치", "처", "장"] },
+            { character: "酒", meaning: "술", sound: "주", grade: 4, options: ["술", "물", "음료", "차"], soundOptions: ["주", "수", "음", "차"] },
+            { character: "朱", meaning: "붉을", sound: "주", grade: 4, options: ["붉을", "푸를", "노랄", "흰"], soundOptions: ["주", "청", "황", "백"] },
+            { character: "周", meaning: "두루", sound: "주", grade: 4, options: ["두루", "중심", "주변", "가운데"], soundOptions: ["주", "심", "변", "중"] },
+            { character: "證", meaning: "증거", sound: "증", grade: 4, options: ["증거", "의심", "확인", "검증"], soundOptions: ["증", "의", "확", "검"] },
+            { character: "持", meaning: "가질", sound: "지", grade: 4, options: ["가질", "버릴", "소유할", "잃을"], soundOptions: ["지", "폐", "유", "실"] },
+            { character: "智", meaning: "슬기/지혜", sound: "지", grade: 4, options: ["슬기/지혜", "무지", "총명", "어리석음"], soundOptions: ["지", "무", "총", "우"] },
+            { character: "誌", meaning: "기록할", sound: "지", grade: 4, options: ["기록할", "지울", "쓸", "읽을"], soundOptions: ["지", "삭", "서", "독"] },
+            { character: "織", meaning: "짤", sound: "직", grade: 4, options: ["짤", "풀", "만들", "부술"], soundOptions: ["직", "해", "작", "파"] },
+            { character: "珍", meaning: "보배", sound: "진", grade: 4, options: ["보배", "쓰레기", "귀중할", "하찮을"], soundOptions: ["진", "쓰", "귀", "하"] },
+            { character: "盡", meaning: "다할", sound: "진", grade: 4, options: ["다할", "남을", "완전할", "부족할"], soundOptions: ["진", "여", "완", "부"] },
+            { character: "陣", meaning: "진칠", sound: "진", grade: 4, options: ["진칠", "후퇴할", "배치할", "해산할"], soundOptions: ["진", "후", "배", "해"] },
+            { character: "差", meaning: "다를", sound: "차", grade: 4, options: ["다를", "같을", "비슷할", "일치할"], soundOptions: ["차", "동", "유", "일"] },
+            { character: "讚", meaning: "기릴", sound: "찬", grade: 4, options: ["기릴", "비난할", "칭찬할", "꾸짖을"], soundOptions: ["찬", "비", "찬", "질"] },
+            { character: "採", meaning: "캘", sound: "채", grade: 4, options: ["캘", "버릴", "채집할", "포기할"], soundOptions: ["채", "폐", "집", "포"] },
+            { character: "冊", meaning: "책", sound: "책", grade: 4, options: ["책", "문서", "종이", "글"], soundOptions: ["책", "문", "지", "서"] },
+            { character: "泉", meaning: "샘", sound: "천", grade: 4, options: ["샘", "강", "바다", "호수"], soundOptions: ["천", "강", "해", "호"] },
+            { character: "聽", meaning: "들을", sound: "청", grade: 4, options: ["들을", "말할", "듣기", "소리"], soundOptions: ["청", "언", "청", "음"] },
+            { character: "廳", meaning: "관청", sound: "청", grade: 4, options: ["관청", "정부", "기관", "사무소"], soundOptions: ["청", "부", "관", "소"] },
+            { character: "招", meaning: "부를", sound: "초", grade: 4, options: ["부를", "보낼", "초대할", "거부할"], soundOptions: ["초", "송", "대", "거"] },
+            { character: "推", meaning: "밀", sound: "추", grade: 4, options: ["밀", "당길", "추진할", "후퇴할"], soundOptions: ["추", "당", "진", "후"] },
+            { character: "縮", meaning: "줄일", sound: "축", grade: 4, options: ["줄일", "늘릴", "축소할", "확장할"], soundOptions: ["축", "증", "축", "확"] },
+            { character: "就", meaning: "나아갈", sound: "취", grade: 4, options: ["나아갈", "물러날", "접근할", "떠날"], soundOptions: ["취", "물", "근", "거"] },
+            { character: "趣", meaning: "뜻", sound: "취", grade: 4, options: ["뜻", "목적", "의미", "가치"], soundOptions: ["취", "적", "의", "가"] },
+            { character: "層", meaning: "층", sound: "층", grade: 4, options: ["층", "바닥", "천장", "벽"], soundOptions: ["층", "바", "천", "벽"] },
+            { character: "寢", meaning: "잘", sound: "침", grade: 4, options: ["잘", "깰", "잠", "깨어날"], soundOptions: ["침", "각", "수", "각"] },
+            { character: "針", meaning: "바늘", sound: "침", grade: 4, options: ["바늘", "실", "천", "가죽"], soundOptions: ["침", "사", "천", "혁"] },
+            { character: "稱", meaning: "일컬을", sound: "칭", grade: 4, options: ["일컬을", "부를", "이름", "별명"], soundOptions: ["칭", "호", "명", "별"] },
+            { character: "歎", meaning: "탄식할", sound: "탄", grade: 4, options: ["탄식할", "기뻐할", "슬플", "즐거울"], soundOptions: ["탄", "희", "비", "락"] },
+            { character: "彈", meaning: "탄알", sound: "탄", grade: 4, options: ["탄알", "총알", "무기", "방어"], soundOptions: ["탄", "총", "무", "방"] },
+            { character: "脫", meaning: "벗을", sound: "탈", grade: 4, options: ["벗을", "입을", "벗기", "입히"], soundOptions: ["탈", "입", "탈", "입"] },
+            { character: "探", meaning: "찾을", sound: "탐", grade: 4, options: ["찾을", "숨길", "탐색할", "무시할"], soundOptions: ["탐", "은", "색", "무"] },
+            { character: "擇", meaning: "가릴", sound: "택", grade: 4, options: ["가릴", "모을", "선택할", "버릴"], soundOptions: ["택", "집", "선", "폐"] },
+            { character: "討", meaning: "칠", sound: "토", grade: 4, options: ["칠", "때릴", "두드릴", "어루만질"], soundOptions: ["토", "타", "타", "무"] },
+            { character: "痛", meaning: "아플", sound: "통", grade: 4, options: ["아플", "낫을", "고통", "편안할"], soundOptions: ["통", "완", "고", "안"] },
+            { character: "投", meaning: "던질", sound: "투", grade: 4, options: ["던질", "받을", "투척할", "잡을"], soundOptions: ["투", "수", "척", "포"] },
+            { character: "鬪", meaning: "싸움", sound: "투", grade: 4, options: ["싸움", "화해", "전쟁", "평화"], soundOptions: ["투", "화", "전", "평"] },
+            { character: "派", meaning: "갈래", sound: "파", grade: 4, options: ["갈래", "분파", "그룹", "단체"], soundOptions: ["파", "분", "그", "단"] },
+            { character: "判", meaning: "판단할", sound: "판", grade: 4, options: ["판단할", "의심할", "결정할", "망설일"], soundOptions: ["판", "의", "결", "망"] },
+            { character: "篇", meaning: "책", sound: "편", grade: 4, options: ["책", "문서", "종이", "글"], soundOptions: ["편", "문", "지", "서"] },
+            { character: "評", meaning: "평할", sound: "평", grade: 4, options: ["평할", "비평할", "칭찬할", "꾸짖을"], soundOptions: ["평", "비", "찬", "질"] },
+            { character: "閉", meaning: "닫을", sound: "폐", grade: 4, options: ["닫을", "열", "닫기", "열기"], soundOptions: ["폐", "개", "폐", "개"] },
+            { character: "胞", meaning: "세포", sound: "포", grade: 4, options: ["세포", "세포", "조직", "기관"], soundOptions: ["포", "포", "조", "기"] },
+            { character: "爆", meaning: "불터질", sound: "폭", grade: 4, options: ["불터질", "안전할", "폭발할", "안정할"], soundOptions: ["폭", "안", "발", "정"] },
+            { character: "標", meaning: "표할", sound: "표", grade: 4, options: ["표할", "숨길", "표시할", "가릴"], soundOptions: ["표", "은", "시", "은"] },
+            { character: "疲", meaning: "피곤할", sound: "피", grade: 4, options: ["피곤할", "활력", "지칠", "원기"], soundOptions: ["피", "활", "지", "원"] },
+            { character: "避", meaning: "피할", sound: "피", grade: 4, options: ["피할", "맞을", "회피할", "직면할"], soundOptions: ["피", "당", "회", "직"] },
+            { character: "閑", meaning: "한가할", sound: "한", grade: 4, options: ["한가할", "바쁠", "여유", "급할"], soundOptions: ["한", "분", "여", "급"] },
+            { character: "恨", meaning: "한", sound: "한", grade: 4, options: ["한", "기쁨", "원망", "감사"], soundOptions: ["한", "희", "원", "감"] },
+            { character: "抗", meaning: "겨룰", sound: "항", grade: 4, options: ["겨룰", "항복할", "저항할", "복종할"], soundOptions: ["항", "복", "저", "복"] },
+            { character: "核", meaning: "씨", sound: "핵", grade: 4, options: ["씨", "열매", "과일", "씨앗"], soundOptions: ["핵", "과", "과", "앗"] },
+            { character: "憲", meaning: "법", sound: "헌", grade: 4, options: ["법", "규칙", "제도", "원칙"], soundOptions: ["헌", "규", "제", "원"] },
+            { character: "險", meaning: "험할", sound: "험", grade: 4, options: ["험할", "안전할", "위험할", "안전할"], soundOptions: ["험", "안", "위", "안"] },
+            { character: "革", meaning: "가죽", sound: "혁", grade: 4, options: ["가죽", "천", "나무", "돌"], soundOptions: ["혁", "천", "목", "석"] },
+            { character: "顯", meaning: "나타날", sound: "현", grade: 4, options: ["나타날", "숨을", "보일", "가릴"], soundOptions: ["현", "은", "시", "은"] },
+            { character: "刑", meaning: "형벌", sound: "형", grade: 4, options: ["형벌", "벌", "처벌", "상"], soundOptions: ["형", "벌", "처", "상"] },
+            { character: "或", meaning: "혹", sound: "혹", grade: 4, options: ["혹", "확실", "아마", "절대"], soundOptions: ["혹", "확", "아", "절"] },
+            { character: "婚", meaning: "혼인할", sound: "혼", grade: 4, options: ["혼인할", "이혼할", "결혼할", "독신할"], soundOptions: ["혼", "이", "결", "독"] },
+            { character: "混", meaning: "섞일", sound: "혼", grade: 4, options: ["섞일", "갈라질", "혼합할", "분리할"], soundOptions: ["혼", "분", "합", "분"] },
+            { character: "紅", meaning: "붉을", sound: "홍", grade: 4, options: ["붉을", "푸를", "노랄", "흰"], soundOptions: ["홍", "청", "황", "백"] },
+            { character: "華", meaning: "빛날", sound: "화", grade: 4, options: ["빛날", "어두울", "밝을", "흐릴"], soundOptions: ["화", "암", "명", "흐"] },
+            { character: "歡", meaning: "기쁠", sound: "환", grade: 4, options: ["기쁠", "슬플", "즐거울", "우울할"], soundOptions: ["환", "비", "락", "우"] },
+            { character: "環", meaning: "고리", sound: "환", grade: 4, options: ["고리", "직선", "원", "사각형"], soundOptions: ["환", "직", "원", "방"] },
+            { character: "況", meaning: "상황", sound: "황", grade: 4, options: ["상황", "상태", "경우", "조건"], soundOptions: ["황", "태", "우", "건"] },
+            { character: "灰", meaning: "재", sound: "회", grade: 4, options: ["재", "불", "나무", "돌"], soundOptions: ["회", "화", "목", "석"] },
+            { character: "厚", meaning: "두터울", sound: "후", grade: 4, options: ["두터울", "얇을", "깊을", "얕을"], soundOptions: ["후", "박", "심", "천"] },
+            { character: "候", meaning: "기후", sound: "후", grade: 4, options: ["기후", "날씨", "온도", "습도"], soundOptions: ["후", "기", "온", "습"] },
+            { character: "揮", meaning: "휘두를", sound: "휘", grade: 4, options: ["휘두를", "멈출", "움직일", "정지할"], soundOptions: ["휘", "정", "동", "정"] },
+            { character: "喜", meaning: "기쁠", sound: "희", grade: 4, options: ["기쁠", "슬플", "즐거울", "우울할"], soundOptions: ["희", "비", "락", "우"] },
+            
+            // 3급 한자
+            { character: "政", meaning: "정치", sound: "정", grade: 3, options: ["정치", "경제", "사회", "문화"], soundOptions: ["정", "민", "국", "간"] },
+            { character: "治", meaning: "다스릴", sound: "치", grade: 3, options: ["다스릴", "지배할", "관리할", "통치할"], soundOptions: ["치", "정", "민", "국"] },
+            { character: "經", meaning: "경제", sound: "경", grade: 3, options: ["경제", "정치", "사회", "문화"], soundOptions: ["경", "치", "정", "민"] },
+            { character: "濟", meaning: "구제할", sound: "제", grade: 3, options: ["구제할", "도울", "돕", "지원할"], soundOptions: ["제", "경", "치", "정"] },
+            { character: "社", meaning: "사회", sound: "사", grade: 3, options: ["사회", "정치", "경제", "문화"], soundOptions: ["사", "제", "경", "치"] },
+            { character: "會", meaning: "모일", sound: "회", grade: 3, options: ["모일", "만날", "모임", "집회"], soundOptions: ["회", "사", "제", "경"] },
+            { character: "文", meaning: "글", sound: "문", grade: 3, options: ["글", "책", "문서", "기록"], soundOptions: ["문", "회", "사", "제"] },
+            { character: "化", meaning: "변화", sound: "화", grade: 3, options: ["변화", "발전", "진보", "개선"], soundOptions: ["화", "문", "회", "사"] },
+            { character: "藝", meaning: "예술", sound: "예", grade: 3, options: ["예술", "기술", "재능", "능력"], soundOptions: ["예", "화", "문", "회"] },
+            { character: "術", meaning: "기술", sound: "술", grade: 3, options: ["기술", "예술", "재능", "능력"], soundOptions: ["술", "예", "화", "문"] },
+            
+            // 2급 한자
+            { character: "法", meaning: "법", sound: "법", grade: 2, options: ["법", "규칙", "제도", "원칙"], soundOptions: ["법", "술", "예", "화"] },
+            { character: "律", meaning: "율법", sound: "율", grade: 2, options: ["율법", "법", "규칙", "제도"], soundOptions: ["율", "법", "술", "예"] },
+            { character: "道", meaning: "길", sound: "도", grade: 2, options: ["길", "방법", "원리", "이치"], soundOptions: ["도", "율", "법", "술"] },
+            { character: "德", meaning: "덕", sound: "덕", grade: 2, options: ["덕", "품성", "인격", "도덕"], soundOptions: ["덕", "도", "율", "법"] },
+            { character: "義", meaning: "의리", sound: "의", grade: 2, options: ["의리", "정의", "도리", "원칙"], soundOptions: ["의", "덕", "도", "율"] },
+            { character: "理", meaning: "이치", sound: "리", grade: 2, options: ["이치", "원리", "도리", "법칙"], soundOptions: ["리", "의", "덕", "도"] },
+            { character: "智", meaning: "지혜", sound: "지", grade: 2, options: ["지혜", "지식", "학문", "교양"], soundOptions: ["지", "리", "의", "덕"] },
+            { character: "慧", meaning: "총명", sound: "혜", grade: 2, options: ["총명", "지혜", "똑똑함", "영리함"], soundOptions: ["혜", "지", "리", "의"] },
+            { character: "仁", meaning: "어짐", sound: "인", grade: 2, options: ["어짐", "인자함", "자비", "사랑"], soundOptions: ["인", "혜", "지", "리"] },
+            { character: "愛", meaning: "사랑", sound: "애", grade: 2, options: ["사랑", "애정", "정", "호감"], soundOptions: ["애", "인", "혜", "지"] },
+            
+            // 1급 한자 (가장 어려운 한자)
+            { character: "哲", meaning: "철학", sound: "철", grade: 1, options: ["철학", "과학", "수학", "물리학"], soundOptions: ["철", "학", "수", "물"] },
+            { character: "學", meaning: "학문", sound: "학", grade: 1, options: ["학문", "지식", "교양", "교육"], soundOptions: ["학", "철", "지", "교"] },
+            { character: "問", meaning: "물을", sound: "문", grade: 1, options: ["물을", "답할", "알", "모를"], soundOptions: ["문", "답", "알", "모"] },
+            { character: "答", meaning: "답할", sound: "답", grade: 1, options: ["답할", "물을", "알", "모를"], soundOptions: ["답", "문", "알", "모"] },
+            { character: "思", meaning: "생각할", sound: "사", grade: 1, options: ["생각할", "꿈꿀", "기억할", "잊을"], soundOptions: ["사", "꿈", "기", "망"] },
+            { character: "考", meaning: "고민할", sound: "고", grade: 1, options: ["고민할", "생각할", "궁리할", "판단할"], soundOptions: ["고", "사", "궁", "판"] },
+            { character: "論", meaning: "논할", sound: "론", grade: 1, options: ["논할", "토론할", "변론할", "의논할"], soundOptions: ["론", "토", "변", "의"] },
+            { character: "辯", meaning: "변론할", sound: "변", grade: 1, options: ["변론할", "논할", "토론할", "의논할"], soundOptions: ["변", "론", "토", "의"] },
+            { character: "證", meaning: "증명할", sound: "증", grade: 1, options: ["증명할", "입증할", "확인할", "검증할"], soundOptions: ["증", "입", "확", "검"] },
+            { character: "明", meaning: "밝을", sound: "명", grade: 1, options: ["밝을", "어두울", "명확할", "분명할"], soundOptions: ["명", "어", "명", "분"] }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let correctAnswers = 0;
+        let totalQuestions = 10;
+        let gameQuestions = [];
+        let selectedAnswer = null;
+        let gameEnded = false;
+        let gameMode = 'meaning'; // 'meaning' or 'sound'
+        let selectedGrade = null; // 선택된 급수
+
+        // 모드 선택
+        function selectMode(mode) {
+            gameMode = mode;
+            document.getElementById('grade-selection').style.display = 'block';
+        }
+
+        // 급수 선택
+        function selectGrade(grade) {
+            selectedGrade = grade;
+            
+            // 선택된 버튼 표시
+            document.querySelectorAll('.grade-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            // 잠시 후 게임 시작
+            setTimeout(() => {
+                document.getElementById('mode-selection').style.display = 'none';
+                initGame();
+            }, 500);
+        }
+
+        // 게임 초기화
+        function initGame() {
+            // 선택된 급수에 해당하는 한자만 필터링
+            const filteredData = hanjaData.filter(hanja => hanja.grade === selectedGrade);
+            
+            // 필터링된 데이터에서 랜덤하게 10개 문제 선택
+            gameQuestions = [...filteredData].sort(() => Math.random() - 0.5).slice(0, totalQuestions);
+            
+            // 만약 해당 급수의 한자가 10개 미만이면 모든 한자 사용
+            if (gameQuestions.length < totalQuestions) {
+                gameQuestions = [...filteredData].sort(() => Math.random() - 0.5);
+            }
+            
+            currentQuestion = 0;
+            score = 0;
+            correctAnswers = 0;
+            gameEnded = false;
+            
+            document.getElementById('game-area').style.display = 'block';
+            document.getElementById('game-over').style.display = 'none';
+            
+            showQuestion();
+        }
+
+        // 문제 표시
+        function showQuestion() {
+            if (currentQuestion >= gameQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const question = gameQuestions[currentQuestion];
+            document.getElementById('hanja').textContent = question.character;
+            
+            // 모드에 따라 다른 질문과 선택지 사용
+            let questionText, shuffledOptions, correctAnswer;
+            
+            if (gameMode === 'meaning') {
+                questionText = '이 한자의 뜻은 무엇일까요?';
+                shuffledOptions = [...question.options].sort(() => Math.random() - 0.5);
+                correctAnswer = question.meaning;
+            } else if (gameMode === 'sound') {
+                questionText = '이 한자의 음은 무엇일까요?';
+                shuffledOptions = [...question.soundOptions].sort(() => Math.random() - 0.5);
+                correctAnswer = question.sound;
+            } else if (gameMode === 'both') {
+                questionText = '이 한자의 뜻과 음을 맞춰보세요';
+                shuffledOptions = generateBothOptions(question);
+                correctAnswer = `${question.meaning} ${question.sound}`;
+            }
+            
+            document.getElementById('question-text').textContent = questionText;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            shuffledOptions.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(option, button, correctAnswer);
+                optionsContainer.appendChild(button);
+            });
+
+            // UI 업데이트
+            document.getElementById('question-number').textContent = `${currentQuestion + 1} / ${totalQuestions}`;
+            document.getElementById('score').textContent = score;
+            // 첫 문제일 때는 정답률 0%로 초기화
+            if (currentQuestion === 0) {
+                document.getElementById('accuracy').textContent = '0%';
+            }
+            document.getElementById('progress-fill').style.width = ((currentQuestion + 1) / totalQuestions) * 100 + '%';
+            
+            // 피드백 및 다음 버튼 초기화
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('next-btn').disabled = true;
+            selectedAnswer = null;
+        }
+        
+        // 뜻+음 모드용 선택지 생성
+        function generateBothOptions(question) {
+            const options = [];
+            const correctOption = `${question.meaning} ${question.sound}`;
+            options.push(correctOption);
+            
+            // 다른 한자들의 뜻과 음을 조합해서 오답 선택지 생성
+            const otherQuestions = gameQuestions.filter(q => q !== question);
+            const shuffledOthers = [...otherQuestions].sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < 3 && i < shuffledOthers.length; i++) {
+                const other = shuffledOthers[i];
+                const wrongOption = `${other.meaning} ${other.sound}`;
+                if (!options.includes(wrongOption)) {
+                    options.push(wrongOption);
+                }
+            }
+            
+            // 부족한 경우 다른 조합으로 채우기
+            while (options.length < 4) {
+                const randomMeaning = question.options[Math.floor(Math.random() * question.options.length)];
+                const randomSound = question.soundOptions[Math.floor(Math.random() * question.soundOptions.length)];
+                const randomOption = `${randomMeaning} ${randomSound}`;
+                if (!options.includes(randomOption)) {
+                    options.push(randomOption);
+                }
+            }
+            
+            return options;
+        }
+
+        // 답 선택
+        function selectAnswer(selectedOption, buttonElement, correctAnswer) {
+            if (gameEnded) return;
+            
+            selectedAnswer = selectedOption;
+            const question = gameQuestions[currentQuestion];
+            const isCorrect = selectedOption === correctAnswer;
+            
+            // 모든 버튼 비활성화
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent === selectedOption && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            // 피드백 표시
+            const feedback = document.getElementById('feedback');
+            if (isCorrect) {
+                feedback.textContent = '정답입니다! 🎉';
+                feedback.className = 'feedback correct';
+                score += 10;
+                correctAnswers++;
+            } else {
+                let answerType;
+                if (gameMode === 'meaning') {
+                    answerType = '뜻';
+                } else if (gameMode === 'sound') {
+                    answerType = '음';
+                } else if (gameMode === 'both') {
+                    answerType = '뜻과 음';
+                }
+                feedback.textContent = `틀렸습니다. 정답은 "${correctAnswer}"입니다.`;
+                feedback.className = 'feedback incorrect';
+            }
+
+            // 점수와 정답률 실시간 업데이트
+            document.getElementById('score').textContent = score;
+            const answeredQuestions = currentQuestion + 1; // 현재 문제까지 답한 수
+            document.getElementById('accuracy').textContent = Math.round((correctAnswers / answeredQuestions) * 100) + '%';
+
+            // 다음 버튼 활성화
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        // 다음 문제
+        function nextQuestion() {
+            currentQuestion++;
+            showQuestion();
+        }
+
+        // 게임 종료
+        function endGame() {
+            gameEnded = true;
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('game-over').style.display = 'block';
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-accuracy').textContent = Math.round((correctAnswers / totalQuestions) * 100) + '%';
+        }
+
+        // 게임 재시작
+        function restartGame() {
+            document.getElementById('mode-selection').style.display = 'block';
+            document.getElementById('grade-selection').style.display = 'none';
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('game-over').style.display = 'none';
+            
+            // 선택 상태 초기화
+            selectedGrade = null;
+            document.querySelectorAll('.grade-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+        }
+
+        // 게임 시작 (모드 선택 화면 표시)
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('mode-selection').style.display = 'block';
+            document.getElementById('game-area').style.display = 'none';
+            document.getElementById('game-over').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
